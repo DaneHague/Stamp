@@ -1,0 +1,223 @@
+@using StampBlazor.Models
+@using StampBlazor.Services
+@inject CollectionInviteService InviteService
+@inject IdentityAuthenticationService AuthService
+@inject NavigationManager Navigation
+
+<div class="invite-acceptance">
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading invitation...</p>
+        </div>
+    }
+    else if (invite == null)
+    {
+        <div class="error-container">
+            <i class="bi bi-exclamation-triangle text-warning"></i>
+            <h3>Invitation Not Found</h3>
+            <p>This invitation link is invalid or has expired.</p>
+            <button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/"))">
+                Go to Home
+            </button>
+        </div>
+    }
+    else if (!AuthService.IsAuthenticated)
+    {
+        <div class="auth-required">
+            <i class="bi bi-person-lock text-info"></i>
+            <h3>Sign In Required</h3>
+            <p>You need to sign in to accept this invitation to join "@invite.Collection?.Name".</p>
+            <button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/login"))">
+                Sign In
+            </button>
+        </div>
+    }
+    else if (AuthService.CurrentUser?.Email != invite.InvitedEmail)
+    {
+        <div class="email-mismatch">
+            <i class="bi bi-envelope-x text-warning"></i>
+            <h3>Email Mismatch</h3>
+            <p>This invitation was sent to <strong>@invite.InvitedEmail</strong>, but you're signed in as <strong>@AuthService.CurrentUser?.Email</strong>.</p>
+            <p>Please sign in with the correct email address to accept this invitation.</p>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" @onclick="@(() => Navigation.NavigateTo("/logout"))">
+                    Sign Out
+                </button>
+                <button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/"))">
+                    Go to Home
+                </button>
+            </div>
+        </div>
+    }
+    else if (inviteProcessed)
+    {
+        <div class="success-container">
+            <i class="bi bi-check-circle text-success"></i>
+            <h3>@(acceptedInvite ? "Welcome to the Team!" : "Invitation Declined")</h3>
+            @if (acceptedInvite)
+            {
+                <p>You've successfully joined the "@invite.Collection?.Name" collection as a @invite.Role.</p>
+                <button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/"))">
+                    Go to Collections
+                </button>
+            }
+            else
+            {
+                <p>You've declined the invitation to join "@invite.Collection?.Name".</p>
+                <button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/"))">
+                    Go to Home
+                </button>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="invite-details">
+            <div class="invite-header">
+                <i class="bi bi-envelope-heart text-primary"></i>
+                <h3>You're Invited!</h3>
+            </div>
+            
+            <div class="invite-card">
+                <div class="invite-info">
+                    <p><strong>@invite.InvitedByUser?.Name</strong> has invited you to join the collection:</p>
+                    <h4 class="collection-name">@invite.Collection?.Name</h4>
+                    @if (!string.IsNullOrEmpty(invite.Collection?.Description))
+                    {
+                        <p class="collection-description">@invite.Collection.Description</p>
+                    }
+                    <div class="role-info">
+                        <span class="role-label">Your role will be:</span>
+                        <span class="role-badge role-@invite.Role.ToString().ToLower()">@invite.Role</span>
+                    </div>
+                    <div class="invite-meta">
+                        <small class="text-muted">
+                            Invitation sent on @invite.CreatedAt.ToString("MMMM dd, yyyy")
+                            @if (invite.ExpiresAt < DateTime.UtcNow.AddDays(1))
+                            {
+                                <span class="text-warning"> • Expires soon!</span>
+                            }
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="invite-actions">
+                    <button class="btn btn-success" @onclick="AcceptInvite" disabled="@isProcessing">
+                        @if (isProcessing && acceptingInvite)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="bi bi-check-lg"></i> Accept Invitation
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="DeclineInvite" disabled="@isProcessing">
+                        @if (isProcessing && !acceptingInvite)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="bi bi-x-lg"></i> Decline
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string InviteToken { get; set; } = string.Empty;
+
+    private CollectionInvite? invite;
+    private bool isLoading = true;
+    private bool isProcessing = false;
+    private bool acceptingInvite = false;
+    private bool inviteProcessed = false;
+    private bool acceptedInvite = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(InviteToken))
+        {
+            await LoadInvite();
+        }
+        else
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadInvite()
+    {
+        try
+        {
+            invite = await InviteService.GetInviteByTokenAsync(InviteToken);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading invite: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task AcceptInvite()
+    {
+        if (invite == null) return;
+
+        isProcessing = true;
+        acceptingInvite = true;
+        StateHasChanged();
+
+        try
+        {
+            var success = await InviteService.AcceptInviteAsync(invite.Id);
+            if (success)
+            {
+                acceptedInvite = true;
+                inviteProcessed = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error accepting invite: {ex.Message}");
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeclineInvite()
+    {
+        if (invite == null) return;
+
+        isProcessing = true;
+        acceptingInvite = false;
+        StateHasChanged();
+
+        try
+        {
+            var success = await InviteService.DeclineInviteAsync(invite.Id);
+            if (success)
+            {
+                acceptedInvite = false;
+                inviteProcessed = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error declining invite: {ex.Message}");
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,216 @@
+.workspace-selector {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.workspace-header {
+    position: relative;
+}
+
+.workspace-current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: var(--bs-gray-100, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.workspace-current:hover {
+    background: var(--bs-gray-200, #e9ecef);
+    border-color: var(--bs-primary, #0d6efd);
+}
+
+.workspace-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.workspace-name {
+    font-weight: 600;
+    color: var(--bs-dark, #212529);
+    font-size: 0.95rem;
+}
+
+.workspace-description {
+    font-size: 0.8rem;
+    color: var(--bs-secondary, #6c757d);
+    margin-top: 0.1rem;
+}
+
+.workspace-chevron {
+    color: var(--bs-secondary, #6c757d);
+    transition: transform 0.2s ease;
+}
+
+.workspace-chevron.open {
+    transform: rotate(180deg);
+}
+
+.workspace-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 0.25rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.workspace-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.workspace-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid var(--bs-gray-100, #f8f9fa);
+    color: var(--bs-dark, #212529);
+}
+
+.workspace-item:hover {
+    background: var(--bs-gray-50, #f8f9fa);
+}
+
+.workspace-item.active {
+    background: var(--bs-primary-bg-subtle, #cfe2ff);
+    color: var(--bs-primary, #0d6efd);
+}
+
+.workspace-item:last-child {
+    border-bottom: none;
+}
+
+.workspace-item-info {
+    flex: 1;
+}
+
+.workspace-item-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.workspace-item-description {
+    font-size: 0.75rem;
+    color: var(--bs-secondary, #6c757d);
+    margin-top: 0.1rem;
+}
+
+.workspace-actions {
+    border-top: 1px solid var(--bs-border-color, #dee2e6);
+    padding: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.workspace-actions .btn {
+    flex: 1;
+    min-width: fit-content;
+}
+
+/* Modal styles consistent with other components */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+.modal-dialog {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.modal-header h5 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--bs-secondary);
+    padding: 0.25rem;
+}
+
+.btn-close:hover {
+    color: var(--bs-dark);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--bs-border-color);
+    justify-content: flex-end;
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    color: var(--bs-dark, #212529);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--bs-primary, #0d6efd);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    color: var(--bs-dark, #212529);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}

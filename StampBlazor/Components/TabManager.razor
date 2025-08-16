@@ -1,0 +1,305 @@
+@using StampBlazor.Models
+@using StampBlazor.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject IJSRuntime JSRuntime
+
+<div class="tab-manager">
+    <div class="tab-bar">
+        <div class="tab-list">
+            @foreach (var (tab, index) in tabs.Select((tab, index) => (tab, index)))
+            {
+                <div class="tab-item @(tab.IsActive ? "active" : "") @(draggedTabId == tab.Id ? "dragging" : "") @(dragOverIndex == index ? "drag-over" : "")" 
+                     @onclick="() => SetActiveTab(tab.Id)"
+                     draggable="true"
+                     @ondragstart="(e) => OnDragStart(e, tab.Id, index)"
+                     @ondragend="OnDragEnd"
+                     @ondragover="(e) => OnDragOver(e, index)"
+                     @ondragover:preventDefault="true"
+                     @ondragleave="OnDragLeave"
+                     @ondrop="(e) => OnDrop(e, index)"
+                     @ondrop:preventDefault="true">
+                    @GetMethodIcon(tab.Request.Method)
+                    <span class="tab-method method-@tab.Request.Method.ToLower()">@tab.Request.Method</span>
+                    <span class="tab-title">@tab.Title</span>
+                    @if (tab.IsDirty)
+                    {
+                        <i class="bi bi-circle-fill tab-dirty-indicator" title="Unsaved changes"></i>
+                    }
+                    <button class="tab-close-btn" @onclick:stopPropagation="true" @onclick="() => CloseTab(tab.Id)" title="Close tab">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            }
+        </div>
+        <button class="add-tab-btn" @onclick="AddNewTab" title="Add new tab">
+            <i class="bi bi-plus"></i>
+        </button>
+    </div>
+
+    <div class="tab-content">
+        @if (activeTab != null)
+        {
+            <RequestBuilder @key="activeTab.Id" 
+                          SelectedRequest="activeTab.Request" 
+                          OnRequestSaved="HandleRequestSaved"
+                          OnRequestChanged="HandleRequestChanged" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnRequestSaved { get; set; }
+
+    private List<RequestTab> tabs = new();
+    private RequestTab? activeTab;
+    
+    // Drag and drop state
+    private string? draggedTabId;
+    private int draggedFromIndex = -1;
+    private int? dragOverIndex;
+    
+    // Debug flag - can be controlled via configuration
+    private bool debugDragDrop = true;
+
+    protected override void OnInitialized()
+    {
+        // Start with one default tab
+        AddNewTab();
+    }
+
+    public void AddNewTab()
+    {
+        var newTab = new RequestTab();
+        tabs.Add(newTab);
+        SetActiveTab(newTab.Id);
+        StateHasChanged();
+    }
+
+    public void LoadRequestInNewTab(ApiRequest request)
+    {
+        var newTab = new RequestTab
+        {
+            Title = string.IsNullOrWhiteSpace(request.Name) ? "Untitled Request" : request.Name,
+            Request = request // Direct reference instead of deep copy
+        };
+        
+        tabs.Add(newTab);
+        SetActiveTab(newTab.Id);
+    }
+
+    private void SetActiveTab(string tabId)
+    {
+        var newActiveTab = tabs.FirstOrDefault(t => t.Id == tabId);
+        if (newActiveTab != activeTab)
+        {
+            if (activeTab != null) activeTab.IsActive = false;
+            if (newActiveTab != null) newActiveTab.IsActive = true;
+            activeTab = newActiveTab;
+            StateHasChanged();
+        }
+    }
+
+    private void CloseTab(string tabId)
+    {
+        var tabToClose = tabs.FirstOrDefault(t => t.Id == tabId);
+        if (tabToClose == null) return;
+
+        // If this is the last tab, don't close it
+        if (tabs.Count == 1) return;
+
+        var tabIndex = tabs.IndexOf(tabToClose);
+        tabs.Remove(tabToClose);
+
+        // If we closed the active tab, set a new active tab
+        if (tabToClose.IsActive)
+        {
+            // Try to activate the tab to the right, or left if at the end
+            var newActiveIndex = tabIndex < tabs.Count ? tabIndex : tabs.Count - 1;
+            if (newActiveIndex >= 0)
+            {
+                SetActiveTab(tabs[newActiveIndex].Id);
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private void HandleRequestChanged()
+    {
+        if (activeTab != null)
+        {
+            var wasAlreadyDirty = activeTab.IsDirty;
+            var oldTitle = activeTab.Title;
+            
+            activeTab.IsDirty = true;
+            
+            // Update tab title if URL is available
+            string newTitle;
+            if (!string.IsNullOrWhiteSpace(activeTab.Request.Url))
+            {
+                var uri = activeTab.Request.Url;
+                try
+                {
+                    var parsedUri = new Uri(uri);
+                    newTitle = parsedUri.Host;
+                }
+                catch
+                {
+                    newTitle = activeTab.Request.Url.Length > 20 
+                        ? activeTab.Request.Url.Substring(0, 20) + "..." 
+                        : activeTab.Request.Url;
+                }
+            }
+            else
+            {
+                newTitle = "New Request";
+            }
+            
+            activeTab.Title = newTitle;
+            
+            // Only trigger re-render if something actually changed
+            if (!wasAlreadyDirty || oldTitle != newTitle)
+            {
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task HandleRequestSaved()
+    {
+        if (activeTab != null && activeTab.IsDirty)
+        {
+            activeTab.IsDirty = false;
+            StateHasChanged();
+        }
+        await OnRequestSaved.InvokeAsync();
+    }
+
+    private RenderFragment GetMethodIcon(string method) => method switch
+    {
+        "GET" => @<i class="bi bi-arrow-down-circle method-icon me-1"></i>,
+        "POST" => @<i class="bi bi-plus-circle method-icon me-1"></i>,
+        "PUT" => @<i class="bi bi-arrow-up-circle method-icon me-1"></i>,
+        "PATCH" => @<i class="bi bi-pencil-square method-icon me-1"></i>,
+        "DELETE" => @<i class="bi bi-trash method-icon me-1"></i>,
+        "HEAD" => @<i class="bi bi-info-circle method-icon me-1"></i>,
+        "OPTIONS" => @<i class="bi bi-gear method-icon me-1"></i>,
+        _ => @<i class="bi bi-question-circle method-icon me-1"></i>
+    };
+
+    // Drag and drop event handlers
+    private void OnDragStart(DragEventArgs e, string tabId, int index)
+    {
+        if (debugDragDrop)
+            Console.WriteLine($"OnDragStart: tabId={tabId}, index={index}");
+        draggedTabId = tabId;
+        draggedFromIndex = index;
+        e.DataTransfer!.EffectAllowed = "move";
+        StateHasChanged();
+    }
+
+    private void OnDragEnd(DragEventArgs e)
+    {
+        if (debugDragDrop)
+            Console.WriteLine("OnDragEnd called");
+        // Clean up drag state when drag ends
+        draggedTabId = null;
+        draggedFromIndex = -1;
+        dragOverIndex = null;
+        StateHasChanged();
+    }
+
+    private void OnDragOver(DragEventArgs e, int index)
+    {
+        if (draggedTabId != null && draggedFromIndex != index)
+        {
+            e.DataTransfer!.DropEffect = "move";
+            dragOverIndex = index;
+            StateHasChanged();
+        }
+    }
+
+    private void OnDragLeave(DragEventArgs e)
+    {
+        dragOverIndex = null;
+        StateHasChanged();
+    }
+
+    private void OnDrop(DragEventArgs e, int dropIndex)
+    {
+        if (debugDragDrop)
+            Console.WriteLine($"OnDrop called: draggedTabId={draggedTabId}, draggedFromIndex={draggedFromIndex}, dropIndex={dropIndex}");
+        
+        if (draggedTabId == null || draggedFromIndex == -1)
+        {
+            if (debugDragDrop)
+                Console.WriteLine("Drop cancelled: Invalid drag state");
+            dragOverIndex = null;
+            return;
+        }
+
+        // Don't do anything if dropping in the same position
+        if (draggedFromIndex == dropIndex)
+        {
+            if (debugDragDrop)
+                Console.WriteLine("Drop cancelled: Same position");
+            dragOverIndex = null;
+            return;
+        }
+
+        // Find the tab being dragged
+        var draggedTab = tabs.FirstOrDefault(t => t.Id == draggedTabId);
+        if (draggedTab == null)
+        {
+            if (debugDragDrop)
+                Console.WriteLine("Drop cancelled: Dragged tab not found");
+            dragOverIndex = null;
+            return;
+        }
+
+        if (debugDragDrop)
+            Console.WriteLine($"Reordering tab '{draggedTab.Title}' from index {draggedFromIndex} to {dropIndex}");
+        
+        try
+        {
+            // Create a new list to ensure proper reordering
+            var newTabs = new List<RequestTab>(tabs);
+            
+            // Remove the tab from its current position
+            newTabs.RemoveAt(draggedFromIndex);
+            
+            // Adjust drop index if we removed an item before it
+            var adjustedDropIndex = draggedFromIndex < dropIndex ? dropIndex - 1 : dropIndex;
+            
+            // Ensure the drop index is within bounds
+            adjustedDropIndex = Math.Max(0, Math.Min(adjustedDropIndex, newTabs.Count));
+            
+            if (debugDragDrop)
+                Console.WriteLine($"Adjusted drop index: {adjustedDropIndex}");
+            
+            // Insert the tab at the new position
+            newTabs.Insert(adjustedDropIndex, draggedTab);
+            
+            // Replace the entire tabs list to ensure proper binding update
+            tabs = newTabs;
+            
+            if (debugDragDrop)
+                Console.WriteLine($"Tab reorder completed. New order: {string.Join(", ", tabs.Select(t => t.Title))}");
+        }
+        catch (Exception ex)
+        {
+            if (debugDragDrop)
+                Console.WriteLine($"Error during tab reordering: {ex.Message}");
+        }
+        finally
+        {
+            // Always reset drag state
+            draggedTabId = null;
+            draggedFromIndex = -1;
+            dragOverIndex = null;
+            
+            // Force UI update
+            InvokeAsync(StateHasChanged);
+        }
+    }
+}

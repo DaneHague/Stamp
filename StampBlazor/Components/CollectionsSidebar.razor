@@ -1,0 +1,266 @@
+@using StampBlazor.Models
+@using StampBlazor.Services
+@inject CollectionService CollectionService
+@inject RequestService RequestService
+@inject IdentityAuthenticationService AuthService
+
+<div class="collections-container">
+    <div class="collections-header">
+        <h3><i class="bi bi-collection me-2"></i>Collections</h3>
+        @if (CurrentWorkspace != null)
+        {
+            <button class="btn btn-sm btn-primary" @onclick="ShowNewCollectionModal">
+                <i class="bi bi-plus-circle"></i> New
+            </button>
+        }
+    </div>
+
+    <div class="collections-list">
+        @if (collections == null)
+        {
+            <div class="loading">Loading...</div>
+        }
+        else if (!collections.Any())
+        {
+            @if (CurrentWorkspace == null)
+            {
+                <div class="empty-state">
+                    <i class="bi bi-briefcase display-1 text-muted mb-3"></i>
+                    <p>Select a workspace to view collections.</p>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="bi bi-folder-plus display-1 text-muted mb-3"></i>
+                    <p>No collections in this workspace yet.</p>
+                    <button class="btn btn-outline-primary btn-sm" @onclick="ShowNewCollectionModal">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Create your first collection
+                    </button>
+                </div>
+            }
+        }
+        else
+        {
+            @foreach (var collection in collections)
+            {
+                <div class="collection-item">
+                    <div class="collection-header" @onclick="() => ToggleCollection(collection.Id)">
+                        <i class="bi @(expandedCollections.Contains(collection.Id) ? "bi-chevron-down" : "bi-chevron-right")"></i>
+                        <span class="collection-name">@collection.Name</span>
+                        <div class="collection-actions">
+                            <button class="btn btn-sm btn-share" @onclick:stopPropagation="true" @onclick="() => ShowMembersModal(collection.Id)" title="Share & Manage Members">
+                                <i class="bi bi-people"></i>
+                                <span class="btn-text">Share</span>
+                            </button>
+                            <button class="btn btn-sm btn-delete" @onclick:stopPropagation="true" @onclick="() => DeleteCollection(collection.Id)" title="Delete Collection">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    @if (expandedCollections.Contains(collection.Id))
+                    {
+                        <div class="requests-list">
+                            @if (collection.Requests?.Any() == true)
+                            {
+                                @foreach (var request in collection.Requests)
+                                {
+                                    <div class="request-item" @onclick="() => OnRequestSelected.InvokeAsync(request)">
+                                        @GetMethodIcon(request.Method)
+                                        <span class="method-badge method-@request.Method.ToLower()">@request.Method</span>
+                                        <span class="request-name">@request.Name</span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="no-requests">
+                                    <i class="bi bi-inbox text-muted me-1"></i>
+                                    No requests in this collection
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@if (showNewCollectionModal)
+{
+    <div class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-folder-plus me-2"></i>Create New Collection</h5>
+                    <button class="btn-close" @onclick="HideNewCollectionModal"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" @bind="newCollectionName" placeholder="Enter collection name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" @bind="newCollectionDescription" placeholder="Enter description (optional)"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="HideNewCollectionModal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" @onclick="CreateCollection" disabled="@string.IsNullOrWhiteSpace(newCollectionName)">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showMembersModal)
+{
+    <div class="modal-backdrop">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-people me-2"></i>Manage Collection Members</h5>
+                    <button class="btn-close" @onclick="HideMembersModal"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="modal-body">
+                    <CollectionMembers CollectionId="@selectedCollectionId" OnMembersChanged="HandleMembersChanged" @ref="collectionMembersRef" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public EventCallback<ApiRequest> OnRequestSelected { get; set; }
+    [Parameter] public Workspace? CurrentWorkspace { get; set; }
+
+    private List<Collection>? collections;
+    private HashSet<int> expandedCollections = new();
+    private bool showNewCollectionModal = false;
+    private string newCollectionName = string.Empty;
+    private string newCollectionDescription = string.Empty;
+    private bool showMembersModal = false;
+    private int selectedCollectionId = 0;
+    private CollectionMembers? collectionMembersRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCollections();
+    }
+
+    private async Task LoadCollections()
+    {
+        if (CurrentWorkspace != null)
+        {
+            collections = await CollectionService.GetCollectionsByWorkspaceAsync(CurrentWorkspace.Id);
+        }
+        else
+        {
+            collections = new List<Collection>();
+        }
+        StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadCollections();
+    }
+
+    private void ToggleCollection(int collectionId)
+    {
+        if (expandedCollections.Contains(collectionId))
+        {
+            expandedCollections.Remove(collectionId);
+        }
+        else
+        {
+            expandedCollections.Add(collectionId);
+        }
+    }
+
+    private void ShowNewCollectionModal()
+    {
+        newCollectionName = string.Empty;
+        newCollectionDescription = string.Empty;
+        showNewCollectionModal = true;
+    }
+
+    private void HideNewCollectionModal()
+    {
+        showNewCollectionModal = false;
+    }
+
+    private async Task CreateCollection()
+    {
+        if (string.IsNullOrWhiteSpace(newCollectionName) || CurrentWorkspace == null)
+            return;
+
+        var newCollection = new Collection
+        {
+            Name = newCollectionName.Trim(),
+            Description = string.IsNullOrWhiteSpace(newCollectionDescription) ? null : newCollectionDescription.Trim(),
+            UserId = AuthService.CurrentUser?.Id,
+            WorkspaceId = CurrentWorkspace.Id
+        };
+
+        var result = await CollectionService.CreateCollectionAsync(newCollection);
+        if (result != null)
+        {
+            await LoadCollections();
+            HideNewCollectionModal();
+        }
+    }
+
+    private async Task DeleteCollection(int collectionId)
+    {
+        if (await CollectionService.DeleteCollectionAsync(collectionId))
+        {
+            await LoadCollections();
+        }
+    }
+
+    private void ShowMembersModal(int collectionId)
+    {
+        selectedCollectionId = collectionId;
+        showMembersModal = true;
+    }
+
+    private void HideMembersModal()
+    {
+        showMembersModal = false;
+        selectedCollectionId = 0;
+    }
+
+    private async Task HandleMembersChanged()
+    {
+        await LoadCollections();
+        StateHasChanged();
+    }
+
+    public async Task RefreshCollections()
+    {
+        await LoadCollections();
+    }
+
+    private RenderFragment GetMethodIcon(string method) => method switch
+    {
+        "GET" => @<i class="bi bi-arrow-down-circle method-icon me-1"></i>,
+        "POST" => @<i class="bi bi-plus-circle method-icon me-1"></i>,
+        "PUT" => @<i class="bi bi-arrow-up-circle method-icon me-1"></i>,
+        "PATCH" => @<i class="bi bi-pencil-square method-icon me-1"></i>,
+        "DELETE" => @<i class="bi bi-trash method-icon me-1"></i>,
+        "HEAD" => @<i class="bi bi-info-circle method-icon me-1"></i>,
+        "OPTIONS" => @<i class="bi bi-gear method-icon me-1"></i>,
+        _ => @<i class="bi bi-question-circle method-icon me-1"></i>
+    };
+}

@@ -1,0 +1,330 @@
+@using StampBlazor.Models
+@using System.Text.Json
+@using System.Net
+
+<div class="response-viewer">
+    <div class="response-header">
+        <div class="response-status">
+            <span class="status-code status-@GetStatusClass()">@((int)Response.StatusCode)</span>
+            <span class="status-text">@Response.StatusText</span>
+        </div>
+        <div class="response-meta">
+            <span class="duration">Time: @FormatDuration(Response.Duration)</span>
+            <button class="btn btn-outline-secondary btn-sm fullscreen-btn" @onclick="ToggleFullscreen" title="Fullscreen">
+                ⤢ Fullscreen
+            </button>
+        </div>
+    </div>
+
+    <div class="response-tabs">
+        <div class="response-tabs-header">
+            <button class="response-tab-button @(activeTab == "body" ? "active" : "")" @onclick='() => SetActiveTab("body")'>
+                Body
+            </button>
+            <button class="response-tab-button @(activeTab == "headers" ? "active" : "")" @onclick='() => SetActiveTab("headers")'>
+                Headers (@Response.Headers.Count)
+            </button>
+        </div>
+
+        <div class="response-tabs-content">
+            @if (activeTab == "body")
+            {
+                <div class="response-body-tab">
+                    @if (string.IsNullOrWhiteSpace(Response.Body))
+                    {
+                        <div class="empty-body">
+                            <p>Response body is empty</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="body-controls">
+                            <div class="body-format-controls">
+                                <label class="form-label">Format:</label>
+                                <select class="form-select body-format-select" @bind="bodyFormat" @bind:after="FormatBody">
+                                    <option value="raw">Raw</option>
+                                    <option value="json">JSON</option>
+                                    <option value="html">HTML</option>
+                                    <option value="xml">XML</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" @onclick="CopyResponse">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                        <div class="response-body-content">
+                            <pre class="response-body-pre"><code>@formattedBody</code></pre>
+                        </div>
+                    }
+                </div>
+            }
+            else if (activeTab == "headers")
+            {
+                <div class="response-headers-tab">
+                    @if (!Response.Headers.Any())
+                    {
+                        <div class="empty-headers">
+                            <p>No response headers</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="headers-list">
+                            @foreach (var header in Response.Headers.OrderBy(h => h.Key))
+                            {
+                                <div class="header-item">
+                                    <div class="header-name">@header.Key</div>
+                                    <div class="header-value">@header.Value</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (isFullscreen)
+{
+    <div class="fullscreen-modal">
+        <div class="fullscreen-overlay" @onclick="CloseFullscreen"></div>
+        <div class="fullscreen-content">
+            <div class="fullscreen-header">
+                <div class="fullscreen-title">
+                    <span class="status-code status-@GetStatusClass()">@((int)Response.StatusCode)</span>
+                    <span class="status-text">@Response.StatusText</span>
+                    <span class="duration-fullscreen">Time: @FormatDuration(Response.Duration)</span>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm close-fullscreen-btn" @onclick="CloseFullscreen" title="Exit Fullscreen">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            
+            <div class="fullscreen-tabs">
+                <div class="fullscreen-tabs-header">
+                    <button class="fullscreen-tab-button @(activeTab == "body" ? "active" : "")" @onclick='() => SetActiveTab("body")'>
+                        Body
+                    </button>
+                    <button class="fullscreen-tab-button @(activeTab == "headers" ? "active" : "")" @onclick='() => SetActiveTab("headers")'>
+                        Headers (@Response.Headers.Count)
+                    </button>
+                </div>
+
+                <div class="fullscreen-tabs-content">
+                    @if (activeTab == "body")
+                    {
+                        <div class="fullscreen-body-tab">
+                            @if (string.IsNullOrWhiteSpace(Response.Body))
+                            {
+                                <div class="empty-body">
+                                    <p>Response body is empty</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="fullscreen-body-controls">
+                                    <div class="body-format-controls">
+                                        <label class="form-label">Format:</label>
+                                        <select class="form-select body-format-select" @bind="bodyFormat" @bind:after="FormatBody">
+                                            <option value="raw">Raw</option>
+                                            <option value="json">JSON</option>
+                                            <option value="html">HTML</option>
+                                            <option value="xml">XML</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-outline-secondary btn-sm" @onclick="CopyResponse">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                </div>
+                                <div class="fullscreen-body-content">
+                                    <pre class="fullscreen-body-pre"><code>@formattedBody</code></pre>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else if (activeTab == "headers")
+                    {
+                        <div class="fullscreen-headers-tab">
+                            @if (!Response.Headers.Any())
+                            {
+                                <div class="empty-headers">
+                                    <p>No response headers</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="fullscreen-headers-list">
+                                    @foreach (var header in Response.Headers.OrderBy(h => h.Key))
+                                    {
+                                        <div class="fullscreen-header-item">
+                                            <div class="header-name">@header.Key</div>
+                                            <div class="header-value">@header.Value</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public HttpResponseInfo Response { get; set; } = new();
+
+    private string activeTab = "body";
+    private string bodyFormat = "raw";
+    private string formattedBody = string.Empty;
+    private bool isFullscreen = false;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(Response.Body))
+        {
+            DetectBodyFormat();
+            FormatBody();
+        }
+    }
+
+    private void DetectBodyFormat()
+    {
+        if (IsValidJson(Response.Body))
+        {
+            bodyFormat = "json";
+        }
+        else if (Response.Body.TrimStart().StartsWith("<"))
+        {
+            bodyFormat = Response.Body.ToLower().Contains("<!doctype html") || Response.Body.ToLower().Contains("<html") ? "html" : "xml";
+        }
+        else
+        {
+            bodyFormat = "raw";
+        }
+    }
+
+    private void FormatBody()
+    {
+        if (string.IsNullOrWhiteSpace(Response.Body))
+        {
+            formattedBody = string.Empty;
+            return;
+        }
+
+        try
+        {
+            formattedBody = bodyFormat switch
+            {
+                "json" when IsValidJson(Response.Body) => FormatJson(Response.Body),
+                "html" => FormatHtml(Response.Body),
+                "xml" => FormatXml(Response.Body),
+                _ => Response.Body
+            };
+        }
+        catch
+        {
+            formattedBody = Response.Body;
+        }
+    }
+
+    private string FormatJson(string json)
+    {
+        try
+        {
+            var parsed = JsonDocument.Parse(json);
+            return JsonSerializer.Serialize(parsed, new JsonSerializerOptions { WriteIndented = true });
+        }
+        catch
+        {
+            return json;
+        }
+    }
+
+    private string FormatHtml(string html)
+    {
+        // Basic HTML formatting - in a real app you might use a proper HTML formatter
+        return html;
+    }
+
+    private string FormatXml(string xml)
+    {
+        // Basic XML formatting - in a real app you might use a proper XML formatter
+        return xml;
+    }
+
+    private void SetActiveTab(string tab)
+    {
+        activeTab = tab;
+    }
+
+    private string GetStatusClass()
+    {
+        var code = (int)Response.StatusCode;
+        return code switch
+        {
+            >= 200 and < 300 => "success",
+            >= 300 and < 400 => "redirect",
+            >= 400 and < 500 => "client-error",
+            >= 500 => "server-error",
+            _ => "unknown"
+        };
+    }
+
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalSeconds < 1)
+            return $"{duration.TotalMilliseconds:F0}ms";
+        else
+            return $"{duration.TotalSeconds:F2}s";
+    }
+
+    private static bool IsValidJson(string text)
+    {
+        try
+        {
+            JsonDocument.Parse(text);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private async Task CopyResponse()
+    {
+        // Note: In a real Blazor WebAssembly app, you'd need to use JSInterop to copy to clipboard
+        // For now, this is a placeholder
+        await Task.CompletedTask;
+    }
+
+    private void ToggleFullscreen()
+    {
+        Console.WriteLine($"ToggleFullscreen called. Current state: {isFullscreen}");
+        isFullscreen = !isFullscreen;
+        Console.WriteLine($"New state: {isFullscreen}");
+        StateHasChanged();
+    }
+
+    private void CloseFullscreen()
+    {
+        Console.WriteLine("CloseFullscreen called");
+        isFullscreen = false;
+        StateHasChanged();
+    }
+
+    private RenderFragment GetStatusIcon()
+    {
+        var code = (int)Response.StatusCode;
+        return code switch
+        {
+            >= 200 and < 300 => @<i class="bi bi-check-circle-fill text-success me-2"></i>,
+            >= 300 and < 400 => @<i class="bi bi-arrow-repeat text-warning me-2"></i>,
+            >= 400 and < 500 => @<i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>,
+            >= 500 => @<i class="bi bi-x-octagon-fill text-danger me-2"></i>,
+            _ => @<i class="bi bi-question-circle text-muted me-2"></i>
+        };
+    }
+}

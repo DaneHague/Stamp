@@ -1,0 +1,130 @@
+﻿@inherits LayoutComponentBase
+@using StampBlazor.Components
+@using StampBlazor.Models
+@using StampBlazor.Services
+@inject IdentityAuthenticationService AuthService
+@inject WorkspaceService WorkspaceService
+
+<div class="stamp-app">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>
+                <i class="bi bi-postcard me-2"></i>
+                Stamp
+            </h2>
+            @if (AuthService.IsAuthenticated && AuthService.CurrentUser != null)
+            {
+                <div class="user-info-compact">
+                    @if (!string.IsNullOrEmpty(AuthService.CurrentUser.AvatarUrl))
+                    {
+                        <img src="@AuthService.CurrentUser.AvatarUrl" alt="Profile" class="profile-avatar-small" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-circle profile-avatar-icon"></i>
+                    }
+                    <span class="user-name">@AuthService.CurrentUser.Name</span>
+                    <button class="logout-btn" @onclick="HandleLogout">
+                        <i class="bi bi-box-arrow-right me-1"></i>
+                        Logout
+                    </button>
+                </div>
+            }
+        </div>
+        @if (AuthService.IsAuthenticated)
+        {
+            <WorkspaceSelector @ref="workspaceSelectorRef" CurrentWorkspace="currentWorkspace" OnWorkspaceChanged="HandleWorkspaceChanged" />
+            <CollectionsSidebar @ref="collectionsSidebarRef" CurrentWorkspace="currentWorkspace" OnRequestSelected="HandleRequestSelected" />
+        }
+    </div>
+
+    <main class="main-content">
+        @if (AuthService.IsAuthenticated)
+        {
+            <TabManager @ref="tabManagerRef" OnRequestSaved="HandleRequestSaved" />
+        }
+        else
+        {
+            @Body
+        }
+    </main>
+</div>
+
+@code {
+    private CollectionsSidebar? collectionsSidebarRef;
+    private TabManager? tabManagerRef;
+    private WorkspaceSelector? workspaceSelectorRef;
+    private Workspace? currentWorkspace;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthService.AuthenticationStateChanged += async () =>
+        {
+            StateHasChanged();
+            if (AuthService.IsAuthenticated && currentWorkspace == null)
+            {
+                await LoadInitialWorkspace();
+            }
+        };
+        await AuthService.InitializeAuth();
+        
+        // Load the first workspace when authenticated
+        if (AuthService.IsAuthenticated)
+        {
+            await LoadInitialWorkspace();
+        }
+    }
+
+    private async Task LoadInitialWorkspace()
+    {
+        try
+        {
+            var workspaces = await WorkspaceService.GetWorkspacesAsync();
+            if (workspaces.Any())
+            {
+                currentWorkspace = workspaces.First();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading initial workspace: {ex.Message}");
+        }
+    }
+
+    private void HandleRequestSelected(ApiRequest request)
+    {
+        tabManagerRef?.LoadRequestInNewTab(request);
+        StateHasChanged();
+    }
+
+    private async Task HandleRequestSaved()
+    {
+        // Force refresh of the collections sidebar
+        if (collectionsSidebarRef != null)
+        {
+            await collectionsSidebarRef.RefreshCollections();
+        }
+        StateHasChanged();
+    }
+
+    private Task HandleWorkspaceChanged(Workspace? workspace)
+    {
+        currentWorkspace = workspace;
+        StateHasChanged();
+        
+        // The CollectionsSidebar will automatically refresh when CurrentWorkspace parameter changes
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthService.SignOutAsync();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        AuthService.AuthenticationStateChanged -= StateHasChanged;
+    }
+}

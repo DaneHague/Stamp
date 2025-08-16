@@ -1,0 +1,95 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = StampBlazor
+build_property.RootNamespace = StampBlazor
+build_property.ProjectDir = /Users/danehague/Documents/Stamp/StampBlazor/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /Users/danehague/Documents/Stamp/StampBlazor
+build_property._RazorSourceGeneratorDebug = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/IdentityLoginComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9JZGVudGl0eUxvZ2luQ29tcG9uZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/LoginComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Mb2dpbkNvbXBvbmVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Pages/Counter.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ291bnRlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Pages/Invite.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvSW52aXRlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Pages/Weather.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvV2VhdGhlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/CollectionMembers.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Db2xsZWN0aW9uTWVtYmVycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-r3yhooikp0
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/CollectionsSidebar.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Db2xsZWN0aW9uc1NpZGViYXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-91ro4hzg6g
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/InviteAcceptance.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9JbnZpdGVBY2NlcHRhbmNlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-dzl0ugi1tx
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/RequestBuilder.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9SZXF1ZXN0QnVpbGRlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-9wjb38ruef
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/RequestTabs.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9SZXF1ZXN0VGFicy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-cela04njua
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/ResponseViewer.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9SZXNwb25zZVZpZXdlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-fi06ikakqn
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/TabManager.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9UYWJNYW5hZ2VyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-j9iv0fwk77
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Components/WorkspaceSelector.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Xb3Jrc3BhY2VTZWxlY3Rvci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-xf1beu4o2d
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0L01haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-k5tqw6csjb
+
+[/Users/danehague/Documents/Stamp/StampBlazor/Layout/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0L05hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-yykkwiixve

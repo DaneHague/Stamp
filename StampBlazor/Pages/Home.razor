@@ -1,0 +1,31 @@
+﻿@page "/"
+@using StampBlazor.Components
+@using StampBlazor.Services
+@inject IdentityAuthenticationService AuthService
+
+<PageTitle>Stamp - API Client</PageTitle>
+
+@if (!AuthService.IsAuthenticated)
+{
+    <IdentityLoginComponent />
+}
+else
+{
+    <div class="welcome-message">
+        <h1>Welcome to Stamp</h1>
+        <p>Select a request from the sidebar or create a new collection to get started.</p>
+    </div>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        AuthService.AuthenticationStateChanged += StateHasChanged;
+        await AuthService.InitializeAuth();
+    }
+
+    public void Dispose()
+    {
+        AuthService.AuthenticationStateChanged -= StateHasChanged;
+    }
+}

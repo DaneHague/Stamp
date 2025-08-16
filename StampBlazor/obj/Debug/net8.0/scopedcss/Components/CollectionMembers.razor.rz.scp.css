@@ -1,0 +1,232 @@
+.collection-members[b-r3yhooikp0] {
+    padding: 1rem;
+}
+
+.members-header[b-r3yhooikp0] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.members-header h4[b-r3yhooikp0] {
+    margin: 0;
+    color: #333;
+}
+
+.members-list[b-r3yhooikp0] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.member-item[b-r3yhooikp0] {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.member-info[b-r3yhooikp0] {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.member-avatar[b-r3yhooikp0] {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.member-avatar-placeholder[b-r3yhooikp0] {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.member-details[b-r3yhooikp0] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.member-name[b-r3yhooikp0] {
+    font-weight: 600;
+    color: #333;
+}
+
+.member-email[b-r3yhooikp0] {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.member-joined[b-r3yhooikp0] {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.member-role[b-r3yhooikp0] {
+    min-width: 120px;
+}
+
+.role-badge[b-r3yhooikp0] {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.role-owner[b-r3yhooikp0] {
+    background-color: #ff6b35;
+    color: white;
+}
+
+.role-admin[b-r3yhooikp0] {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.role-member[b-r3yhooikp0] {
+    background-color: #6c757d;
+    color: white;
+}
+
+.member-actions[b-r3yhooikp0] {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.pending-invites[b-r3yhooikp0] {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.pending-invites h5[b-r3yhooikp0] {
+    margin-bottom: 0.75rem;
+    color: #333;
+    font-size: 1rem;
+}
+
+.invite-item[b-r3yhooikp0] {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: #fff3cd;
+    border-radius: 6px;
+    border: 1px solid #ffeaa7;
+    margin-bottom: 0.5rem;
+}
+
+.invite-info[b-r3yhooikp0] {
+    flex: 1;
+}
+
+.invite-email[b-r3yhooikp0] {
+    font-weight: 600;
+    color: #333;
+}
+
+.invite-role[b-r3yhooikp0],
+.invite-date[b-r3yhooikp0] {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.invite-actions[b-r3yhooikp0] {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.loading[b-r3yhooikp0] {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.modal-backdrop[b-r3yhooikp0] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-dialog[b-r3yhooikp0] {
+    background: white;
+    border-radius: 8px;
+    min-width: 400px;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content[b-r3yhooikp0] {
+    padding: 0;
+}
+
+.modal-header[b-r3yhooikp0] {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h5[b-r3yhooikp0] {
+    margin: 0;
+    color: #333;
+}
+
+.btn-close[b-r3yhooikp0] {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-body[b-r3yhooikp0] {
+    padding: 1.5rem;
+}
+
+.modal-footer[b-r3yhooikp0] {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.alert[b-r3yhooikp0] {
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.alert-danger[b-r3yhooikp0] {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}

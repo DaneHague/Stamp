@@ -1,0 +1,237 @@
+.tab-manager[b-j9iv0fwk77] {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #f8f9fa;
+}
+
+.tab-bar[b-j9iv0fwk77] {
+    display: flex;
+    background-color: #2b2b2b;
+    border-bottom: 1px solid #444;
+    min-height: 42px;
+    padding: 0 0.5rem;
+}
+
+.tab-list[b-j9iv0fwk77] {
+    display: flex;
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 2px;
+    padding: 0.25rem 0;
+}
+
+.tab-item[b-j9iv0fwk77] {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background-color: #3a3a3a;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    min-width: 180px;
+    max-width: 280px;
+    position: relative;
+    transition: all 0.2s ease;
+    border: 1px solid #444;
+    border-bottom: none;
+}
+
+.tab-item:hover[b-j9iv0fwk77] {
+    background-color: #404040;
+}
+
+.tab-item.active[b-j9iv0fwk77] {
+    background-color: #f8f9fa;
+    border-color: #d0d7de;
+    border-bottom: 1px solid #f8f9fa;
+    margin-bottom: -1px;
+}
+
+.tab-method[b-j9iv0fwk77] {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+    min-width: 40px;
+    text-align: center;
+}
+
+.tab-method.method-get[b-j9iv0fwk77] { background-color: #22c55e; }
+.tab-method.method-post[b-j9iv0fwk77] { background-color: #3b82f6; }
+.tab-method.method-put[b-j9iv0fwk77] { background-color: #f59e0b; }
+.tab-method.method-delete[b-j9iv0fwk77] { background-color: #ef4444; }
+.tab-method.method-patch[b-j9iv0fwk77] { background-color: #8b5cf6; }
+.tab-method.method-head[b-j9iv0fwk77] { background-color: #6b7280; }
+.tab-method.method-options[b-j9iv0fwk77] { background-color: #374151; }
+
+.tab-title[b-j9iv0fwk77] {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tab-item .tab-title[b-j9iv0fwk77] {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.tab-item:hover .tab-title[b-j9iv0fwk77] {
+    color: #ffffff;
+}
+
+.tab-item.active .tab-title[b-j9iv0fwk77] {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.tab-dirty-indicator[b-j9iv0fwk77] {
+    color: #ff6b35;
+    font-weight: bold;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.tab-close-btn[b-j9iv0fwk77] {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    color: #9ca3af;
+}
+
+.tab-item .tab-close-btn[b-j9iv0fwk77] {
+    color: #9ca3af;
+}
+
+.tab-item .tab-close-btn:hover[b-j9iv0fwk77] {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.tab-item.active .tab-close-btn[b-j9iv0fwk77] {
+    color: #6b7280;
+}
+
+.tab-item.active .tab-close-btn:hover[b-j9iv0fwk77] {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.add-tab-btn[b-j9iv0fwk77] {
+    background: none;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    font-size: 1.2rem;
+    color: #9ca3af;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.add-tab-btn:hover[b-j9iv0fwk77] {
+    background-color: #404040;
+    color: #ffffff;
+}
+
+.add-tab-btn:focus[b-j9iv0fwk77] {
+    outline: none;
+    background-color: #404040;
+    color: #ffffff;
+}
+
+.tab-content[b-j9iv0fwk77] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Scrollbar styling for tab list */
+.tab-list[b-j9iv0fwk77]::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tab-list[b-j9iv0fwk77]::-webkit-scrollbar-track {
+    background: #2b2b2b;
+}
+
+.tab-list[b-j9iv0fwk77]::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 2px;
+}
+
+.tab-list[b-j9iv0fwk77]::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* Drag and drop styles */
+.tab-item.dragging[b-j9iv0fwk77] {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tab-item.drag-over[b-j9iv0fwk77] {
+    border-left: 3px solid #ff6b35 !important;
+    transform: translateX(3px);
+    background-color: rgba(255, 107, 53, 0.1) !important;
+}
+
+.tab-item.drag-over.active[b-j9iv0fwk77] {
+    background-color: rgba(255, 107, 53, 0.15) !important;
+}
+
+/* Ensure draggable cursor */
+.tab-item[draggable="true"][b-j9iv0fwk77] {
+    cursor: grab;
+}
+
+.tab-item[draggable="true"]:active[b-j9iv0fwk77] {
+    cursor: grabbing;
+}
+
+/* Smooth transitions for drag operations */
+.tab-item[b-j9iv0fwk77] {
+    transition: all 0.2s ease, transform 0.1s ease, opacity 0.1s ease;
+}
+
+/* Prevent text selection during drag */
+.tab-item *[b-j9iv0fwk77] {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Only disable pointer events on specific elements to avoid interfering with drag and drop */
+.tab-item .tab-title[b-j9iv0fwk77],
+.tab-item .tab-method[b-j9iv0fwk77],
+.tab-item .method-icon[b-j9iv0fwk77] {
+    pointer-events: none;
+}
+
+/* Ensure close button still works */
+.tab-close-btn[b-j9iv0fwk77] {
+    pointer-events: auto !important;
+}
+
+/* Ensure tab itself can receive drag events */
+.tab-item[b-j9iv0fwk77] {
+    pointer-events: auto;
+}

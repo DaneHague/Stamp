@@ -1,0 +1,477 @@
+@using StampBlazor.Models
+@using System.Text.Json
+
+<div class="request-tabs-container">
+    <div class="tabs-header">
+        <button class="tab-button @(activeTab == "params" ? "active" : "")" @onclick='() => SetActiveTab("params")'>
+            <i class="bi bi-sliders me-1"></i>
+            Params
+        </button>
+        <button class="tab-button @(activeTab == "headers" ? "active" : "")" @onclick='() => SetActiveTab("headers")'>
+            <i class="bi bi-list-ul me-1"></i>
+            Headers
+        </button>
+        <button class="tab-button @(activeTab == "body" ? "active" : "")" @onclick='() => SetActiveTab("body")'>
+            <i class="bi bi-file-text me-1"></i>
+            Body
+        </button>
+        <button class="tab-button @(activeTab == "auth" ? "active" : "")" @onclick='() => SetActiveTab("auth")'>
+            <i class="bi bi-shield-lock me-1"></i>
+            Auth
+        </button>
+    </div>
+
+    <div class="tabs-content">
+        @if (activeTab == "params")
+        {
+            <div class="params-tab">
+                <div class="tab-description">
+                    <p>Query parameters will be automatically added to the URL.</p>
+                </div>
+                <div class="key-value-editor">
+                    @for (int i = 0; i < queryParams.Count; i++)
+                    {
+                        var index = i;
+                        <div class="key-value-row">
+                            <input type="text" class="form-control key-input" 
+                                   placeholder="Key" 
+                                   @bind="queryParams[index].Key" 
+                                   @bind:after="() => UpdateQueryParams()" />
+                            <input type="text" class="form-control value-input" 
+                                   placeholder="Value" 
+                                   @bind="queryParams[index].Value" 
+                                   @bind:after="() => UpdateQueryParams()" />
+                            <button class="btn btn-outline-danger btn-sm delete-btn" 
+                                    @onclick="() => RemoveQueryParam(index)"
+                                    disabled="@(queryParams.Count <= 1)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    }
+                    <button class="btn btn-outline-primary btn-sm add-btn" @onclick="AddQueryParam">
+                        <i class="bi bi-plus-circle"></i> Add Parameter
+                    </button>
+                </div>
+            </div>
+        }
+        else if (activeTab == "headers")
+        {
+            <div class="headers-tab">
+                <div class="tab-description">
+                    <p>Add custom headers to your request.</p>
+                </div>
+                <div class="key-value-editor">
+                    @for (int i = 0; i < headers.Count; i++)
+                    {
+                        var index = i;
+                        <div class="key-value-row">
+                            <input type="text" class="form-control key-input" 
+                                   placeholder="Header Name" 
+                                   @bind="headers[index].Key" 
+                                   @bind:after="() => UpdateHeaders()" />
+                            <input type="text" class="form-control value-input" 
+                                   placeholder="Header Value" 
+                                   @bind="headers[index].Value" 
+                                   @bind:after="() => UpdateHeaders()" />
+                            <button class="btn btn-outline-danger btn-sm delete-btn" 
+                                    @onclick="() => RemoveHeader(index)"
+                                    disabled="@(headers.Count <= 1)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    }
+                    <button class="btn btn-outline-primary btn-sm add-btn" @onclick="AddHeader">
+                        <i class="bi bi-plus-circle"></i> Add Header
+                    </button>
+                </div>
+            </div>
+        }
+        else if (activeTab == "body")
+        {
+            <div class="body-tab">
+                <div class="tab-description">
+                    <p>Request body content (for POST, PUT, PATCH requests).</p>
+                </div>
+                <div class="body-editor">
+                    <div class="body-type-selector">
+                        <label class="form-label">
+                            <i class="bi bi-file-earmark-code me-1"></i>
+                            Body Type:
+                        </label>
+                        <select class="form-select body-type-select" @bind="bodyType">
+                            <option value="none">None</option>
+                            <option value="raw">Raw Text</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    
+                    @if (bodyType != "none")
+                    {
+                        <div class="body-content">
+                            <textarea class="form-control body-textarea" 
+                                      rows="12" 
+                                      placeholder="@GetBodyPlaceholder()" 
+                                      @bind="bodyContent" 
+                                      @bind:after="() => UpdateBody()"></textarea>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else if (activeTab == "auth")
+        {
+            <div class="auth-tab">
+                <div class="tab-description">
+                    <p>Configure authentication for your request.</p>
+                </div>
+                <div class="auth-editor">
+                    <div class="auth-type-selector">
+                        <label class="form-label">
+                            <i class="bi bi-key me-1"></i>
+                            Authentication Type:
+                        </label>
+                        <select class="form-select auth-type-select" @bind="authType" @bind:after="() => UpdateAuthentication()">
+                            <option value="None">No Auth</option>
+                            <option value="BasicAuth">Basic Auth</option>
+                            <option value="BearerToken">Bearer Token</option>
+                            <option value="ApiKey">API Key</option>
+                        </select>
+                    </div>
+                    
+                    @if (authType == "BasicAuth")
+                    {
+                        <div class="auth-content basic-auth">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-person me-1"></i>
+                                    Username:
+                                </label>
+                                <input type="text" class="form-control" @bind="basicAuthUsername" @bind:after="() => UpdateAuthentication()" placeholder="Enter username" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-lock me-1"></i>
+                                    Password:
+                                </label>
+                                <input type="password" class="form-control" @bind="basicAuthPassword" @bind:after="() => UpdateAuthentication()" placeholder="Enter password" />
+                            </div>
+                        </div>
+                    }
+                    else if (authType == "BearerToken")
+                    {
+                        <div class="auth-content bearer-token">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-shield-check me-1"></i>
+                                    Token:
+                                </label>
+                                <input type="text" class="form-control" @bind="bearerToken" @bind:after="() => UpdateAuthentication()" placeholder="Enter bearer token" />
+                            </div>
+                        </div>
+                    }
+                    else if (authType == "ApiKey")
+                    {
+                        <div class="auth-content api-key">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-key-fill me-1"></i>
+                                    Key:
+                                </label>
+                                <input type="text" class="form-control" @bind="apiKeyName" @bind:after="() => UpdateAuthentication()" placeholder="Enter key name (e.g., X-API-Key)" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-code-square me-1"></i>
+                                    Value:
+                                </label>
+                                <input type="text" class="form-control" @bind="apiKeyValue" @bind:after="() => UpdateAuthentication()" placeholder="Enter key value" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-arrow-right-circle me-1"></i>
+                                    Add to:
+                                </label>
+                                <select class="form-select" @bind="apiKeyLocation" @bind:after="() => UpdateAuthentication()">
+                                    <option value="Header">Header</option>
+                                    <option value="QueryParameter">Query Parameter</option>
+                                </select>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public ApiRequest CurrentRequest { get; set; } = new();
+    [Parameter] public EventCallback<ApiRequest> CurrentRequestChanged { get; set; }
+
+    private string activeTab = "params";
+    private List<KeyValuePair> queryParams = new() { new KeyValuePair() };
+    private List<KeyValuePair> headers = new() { new KeyValuePair() };
+    private string bodyType = "none";
+    private string bodyContent = string.Empty;
+    
+    // Authentication fields
+    private string authType = "None";
+    private string basicAuthUsername = string.Empty;
+    private string basicAuthPassword = string.Empty;
+    private string bearerToken = string.Empty;
+    private string apiKeyName = string.Empty;
+    private string apiKeyValue = string.Empty;
+    private string apiKeyLocation = "Header";
+
+    public class KeyValuePair
+    {
+        public string Key { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+    }
+
+    protected override void OnParametersSet()
+    {
+        LoadFromCurrentRequest();
+    }
+
+    private void LoadFromCurrentRequest()
+    {
+        // Load query params
+        if (!string.IsNullOrWhiteSpace(CurrentRequest.QueryParams))
+        {
+            try
+            {
+                var paramDict = JsonSerializer.Deserialize<Dictionary<string, string>>(CurrentRequest.QueryParams);
+                if (paramDict != null)
+                {
+                    queryParams = paramDict.Select(kv => new KeyValuePair { Key = kv.Key, Value = kv.Value }).ToList();
+                    if (!queryParams.Any())
+                        queryParams.Add(new KeyValuePair());
+                }
+            }
+            catch
+            {
+                // Fallback: try to parse as query string
+                ParseQueryString(CurrentRequest.QueryParams);
+            }
+        }
+
+        // Load headers
+        if (!string.IsNullOrWhiteSpace(CurrentRequest.Headers))
+        {
+            try
+            {
+                var headerDict = JsonSerializer.Deserialize<Dictionary<string, string>>(CurrentRequest.Headers);
+                if (headerDict != null)
+                {
+                    headers = headerDict.Select(kv => new KeyValuePair { Key = kv.Key, Value = kv.Value }).ToList();
+                    if (!headers.Any())
+                        headers.Add(new KeyValuePair());
+                }
+            }
+            catch
+            {
+                headers = new() { new KeyValuePair() };
+            }
+        }
+
+        // Load body
+        if (!string.IsNullOrWhiteSpace(CurrentRequest.Body))
+        {
+            bodyContent = CurrentRequest.Body;
+            bodyType = IsValidJson(CurrentRequest.Body) ? "json" : "raw";
+        }
+
+        // Load authentication
+        if (!string.IsNullOrWhiteSpace(CurrentRequest.Authentication))
+        {
+            try
+            {
+                var auth = JsonSerializer.Deserialize<RequestAuthentication>(CurrentRequest.Authentication);
+                if (auth != null)
+                {
+                    authType = auth.Type.ToString();
+                    basicAuthUsername = auth.Username ?? string.Empty;
+                    basicAuthPassword = auth.Password ?? string.Empty;
+                    bearerToken = auth.Token ?? string.Empty;
+                    apiKeyName = auth.ApiKeyName ?? string.Empty;
+                    apiKeyValue = auth.ApiKeyValue ?? string.Empty;
+                    apiKeyLocation = auth.ApiKeyLocation.ToString();
+                }
+            }
+            catch
+            {
+                // Reset to defaults if deserialization fails
+                authType = "None";
+                basicAuthUsername = string.Empty;
+                basicAuthPassword = string.Empty;
+                bearerToken = string.Empty;
+                apiKeyName = string.Empty;
+                apiKeyValue = string.Empty;
+                apiKeyLocation = "Header";
+            }
+        }
+    }
+
+    private void ParseQueryString(string queryString)
+    {
+        queryParams.Clear();
+        if (string.IsNullOrWhiteSpace(queryString))
+        {
+            queryParams.Add(new KeyValuePair());
+            return;
+        }
+
+        var pairs = queryString.TrimStart('?').Split('&');
+        foreach (var pair in pairs)
+        {
+            var parts = pair.Split('=', 2);
+            queryParams.Add(new KeyValuePair 
+            { 
+                Key = Uri.UnescapeDataString(parts[0]), 
+                Value = parts.Length > 1 ? Uri.UnescapeDataString(parts[1]) : string.Empty 
+            });
+        }
+
+        if (!queryParams.Any())
+            queryParams.Add(new KeyValuePair());
+    }
+
+    private void SetActiveTab(string tab)
+    {
+        activeTab = tab;
+    }
+
+    private void AddQueryParam()
+    {
+        queryParams.Add(new KeyValuePair());
+    }
+
+    private void RemoveQueryParam(int index)
+    {
+        if (queryParams.Count > 1)
+        {
+            queryParams.RemoveAt(index);
+            UpdateQueryParams();
+        }
+    }
+
+    private void AddHeader()
+    {
+        headers.Add(new KeyValuePair());
+    }
+
+    private void RemoveHeader(int index)
+    {
+        if (headers.Count > 1)
+        {
+            headers.RemoveAt(index);
+            UpdateHeaders();
+        }
+    }
+
+    private void UpdateQueryParams()
+    {
+        var validParams = queryParams.Where(p => !string.IsNullOrWhiteSpace(p.Key)).ToList();
+        var paramDict = validParams.ToDictionary(p => p.Key, p => p.Value);
+        var newQueryParams = paramDict.Any() ? JsonSerializer.Serialize(paramDict) : null;
+        
+        if (CurrentRequest.QueryParams != newQueryParams)
+        {
+            CurrentRequest.QueryParams = newQueryParams;
+            CurrentRequestChanged.InvokeAsync(CurrentRequest);
+        }
+    }
+
+    private void UpdateHeaders()
+    {
+        var validHeaders = headers.Where(h => !string.IsNullOrWhiteSpace(h.Key)).ToList();
+        var headerDict = validHeaders.ToDictionary(h => h.Key, h => h.Value);
+        var newHeaders = headerDict.Any() ? JsonSerializer.Serialize(headerDict) : null;
+        
+        if (CurrentRequest.Headers != newHeaders)
+        {
+            CurrentRequest.Headers = newHeaders;
+            CurrentRequestChanged.InvokeAsync(CurrentRequest);
+        }
+    }
+
+    private void UpdateBody()
+    {
+        var newBody = string.IsNullOrWhiteSpace(bodyContent) ? null : bodyContent;
+        if (CurrentRequest.Body != newBody)
+        {
+            CurrentRequest.Body = newBody;
+            CurrentRequestChanged.InvokeAsync(CurrentRequest);
+        }
+    }
+
+    private void UpdateAuthentication()
+    {
+        string newAuth;
+        
+        if (authType == "None")
+        {
+            newAuth = null;
+        }
+        else
+        {
+            var auth = new RequestAuthentication();
+            
+            if (Enum.TryParse<AuthenticationType>(authType, out var authTypeEnum))
+            {
+                auth.Type = authTypeEnum;
+            }
+
+            switch (authType)
+            {
+                case "BasicAuth":
+                    auth.Username = basicAuthUsername;
+                    auth.Password = basicAuthPassword;
+                    break;
+                case "BearerToken":
+                    auth.Token = bearerToken;
+                    break;
+                case "ApiKey":
+                    auth.ApiKeyName = apiKeyName;
+                    auth.ApiKeyValue = apiKeyValue;
+                    if (Enum.TryParse<ApiKeyLocation>(apiKeyLocation, out var locationEnum))
+                    {
+                        auth.ApiKeyLocation = locationEnum;
+                    }
+                    break;
+            }
+
+            newAuth = JsonSerializer.Serialize(auth);
+        }
+        
+        if (CurrentRequest.Authentication != newAuth)
+        {
+            CurrentRequest.Authentication = newAuth;
+            CurrentRequestChanged.InvokeAsync(CurrentRequest);
+        }
+    }
+
+    private string GetBodyPlaceholder()
+    {
+        return bodyType switch
+        {
+            "json" => "{\n  \"key\": \"value\"\n}",
+            "raw" => "Enter raw text here...",
+            _ => string.Empty
+        };
+    }
+
+    private static bool IsValidJson(string text)
+    {
+        try
+        {
+            JsonDocument.Parse(text);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}

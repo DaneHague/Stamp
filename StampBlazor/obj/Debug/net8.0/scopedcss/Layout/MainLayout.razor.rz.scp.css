@@ -1,0 +1,89 @@
+.stamp-app[b-k5tqw6csjb] {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar[b-k5tqw6csjb] {
+    width: 300px;
+    background-color: #2b2b2b;
+    color: white;
+    border-right: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header[b-k5tqw6csjb] {
+    padding: 1rem;
+    border-bottom: 1px solid #444;
+    background-color: #1e1e1e;
+}
+
+.sidebar-header h2[b-k5tqw6csjb] {
+    margin: 0;
+    color: #ff6b35;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.user-info-compact[b-k5tqw6csjb] {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-avatar-small[b-k5tqw6csjb] {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-name[b-k5tqw6csjb] {
+    font-size: 0.875rem;
+    color: #ccc;
+    font-weight: 500;
+}
+
+.logout-btn[b-k5tqw6csjb] {
+    background-color: #ff6b35;
+    border: 1px solid #ff6b35;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover[b-k5tqw6csjb] {
+    background-color: #e55a2b;
+    border-color: #e55a2b;
+    transform: translateY(-1px);
+}
+
+.logout-btn:active[b-k5tqw6csjb] {
+    transform: translateY(0);
+}
+
+.main-content[b-k5tqw6csjb] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+.request-workspace[b-k5tqw6csjb] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .sidebar[b-k5tqw6csjb] {
+        width: 250px;
+    }
+}

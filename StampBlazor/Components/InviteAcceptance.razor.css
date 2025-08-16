@@ -1,0 +1,177 @@
+.invite-acceptance {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.loading-container,
+.error-container,
+.auth-required,
+.email-mismatch,
+.success-container {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.loading-container .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+}
+
+.error-container i,
+.auth-required i,
+.email-mismatch i,
+.success-container i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.invite-details {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.invite-header {
+    text-align: center;
+    padding: 2rem 2rem 1rem;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+}
+
+.invite-header i {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.invite-header h3 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.invite-card {
+    padding: 2rem;
+}
+
+.invite-info {
+    margin-bottom: 2rem;
+}
+
+.invite-info p {
+    margin-bottom: 1rem;
+    color: #6c757d;
+}
+
+.collection-name {
+    color: #333;
+    margin: 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.collection-description {
+    font-style: italic;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+.role-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+}
+
+.role-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.role-owner {
+    background-color: #ff6b35;
+    color: white;
+}
+
+.role-admin {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.role-member {
+    background-color: #6c757d;
+    color: white;
+}
+
+.invite-meta {
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.invite-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.invite-actions .btn {
+    min-width: 150px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.invite-actions .btn:hover {
+    transform: translateY(-1px);
+}
+
+.d-flex {
+    display: flex;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.text-success {
+    color: #198754 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.text-info {
+    color: #0dcaf0 !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}

@@ -1,0 +1,170 @@
+@inject AuthenticationService AuthService
+@inject IJSRuntime JSRuntime
+
+<div class="login-container">
+    @if (!AuthService.IsAuthenticated)
+    {
+        <div class="login-card">
+            <h3>Welcome to Stamp</h3>
+            <p>Sign in with your Google account to get started</p>
+            
+            <button class="btn btn-primary google-signin-btn" @onclick="SignInAsync" disabled="@isSigningIn">
+                @if (isSigningIn)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    <span>Signing in...</span>
+                }
+                else
+                {
+                    <i class="fab fa-google me-2"></i>
+                    <span>Sign in with Google</span>
+                }
+            </button>
+            
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3" role="alert">
+                    @errorMessage
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="user-info">
+            <div class="d-flex align-items-center">
+                @if (!string.IsNullOrEmpty(AuthService.CurrentUser?.AvatarUrl))
+                {
+                    <img src="@AuthService.CurrentUser.AvatarUrl" alt="Profile" class="profile-avatar me-2" />
+                }
+                <div>
+                    <div class="fw-bold">@AuthService.CurrentUser?.Name</div>
+                    <div class="text-muted small">@AuthService.CurrentUser?.Email</div>
+                </div>
+                <button class="btn btn-outline-secondary ms-auto" @onclick="SignOutAsync" disabled="@isSigningOut">
+                    @if (isSigningOut)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    }
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 50vh;
+    }
+    
+    .login-card {
+        text-align: center;
+        padding: 2rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        background-color: white;
+        max-width: 400px;
+    }
+    
+    .google-signin-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 0.375rem;
+        border: none;
+        background-color: #4285f4;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+    }
+    
+    .google-signin-btn:hover:not(:disabled) {
+        background-color: #3367d6;
+    }
+    
+    .google-signin-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .profile-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .user-info {
+        padding: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background-color: #f8f9fa;
+    }
+</style>
+
+@code {
+    private bool isSigningIn = false;
+    private bool isSigningOut = false;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthService.AuthenticationStateChanged += StateHasChanged;
+        await AuthService.InitializeGoogleAuth();
+    }
+
+    private async Task SignInAsync()
+    {
+        isSigningIn = true;
+        errorMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            var success = await AuthService.SignInWithGoogle();
+            if (!success)
+            {
+                errorMessage = "Sign-in failed. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Sign-in error: {ex.Message}";
+            Console.WriteLine($"Sign-in error: {ex}");
+        }
+        finally
+        {
+            isSigningIn = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SignOutAsync()
+    {
+        isSigningOut = true;
+        StateHasChanged();
+
+        try
+        {
+            await AuthService.SignOut();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Sign-out error: {ex}");
+        }
+        finally
+        {
+            isSigningOut = false;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        AuthService.AuthenticationStateChanged -= StateHasChanged;
+    }
+}

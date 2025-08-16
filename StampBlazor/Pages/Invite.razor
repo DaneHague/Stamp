@@ -1,0 +1,10 @@
+@page "/invite/{token}"
+@using StampBlazor.Components
+
+<PageTitle>Collection Invitation - Stamp</PageTitle>
+
+<InviteAcceptance InviteToken="@Token" />
+
+@code {
+    [Parameter] public string Token { get; set; } = string.Empty;
+}

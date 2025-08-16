@@ -1,0 +1,282 @@
+@using StampBlazor.Models
+@using StampBlazor.Services
+@inject CollectionMemberService MemberService
+@inject CollectionInviteService InviteService
+@inject IdentityAuthenticationService AuthService
+
+<div class="collection-members">
+    <div class="members-header">
+        <h4>Collection Members</h4>
+        <button class="btn btn-sm btn-primary" @onclick="ShowInviteModal">
+            <i class="bi bi-person-plus"></i> Invite
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading">Loading members...</div>
+    }
+    else
+    {
+        <div class="members-list">
+            @foreach (var member in members)
+            {
+                <div class="member-item">
+                    <div class="member-info">
+                        @if (!string.IsNullOrEmpty(member.User?.AvatarUrl))
+                        {
+                            <img src="@member.User.AvatarUrl" alt="@member.User.Name" class="member-avatar" />
+                        }
+                        else
+                        {
+                            <div class="member-avatar-placeholder">
+                                @(member.User?.Name?.FirstOrDefault().ToString().ToUpper() ?? "?")
+                            </div>
+                        }
+                        <div class="member-details">
+                            <div class="member-name">@member.User?.Name</div>
+                            <div class="member-email">@member.User?.Email</div>
+                            <div class="member-joined">Joined @member.JoinedAt.ToString("MMM dd, yyyy")</div>
+                        </div>
+                    </div>
+                    <div class="member-role">
+                        @if (currentUserRole == CollectionRole.Owner && member.UserId != AuthService.CurrentUser?.Id)
+                        {
+                            <select class="form-select form-select-sm" value="@member.Role" @onchange="(e) => UpdateMemberRole(member, (CollectionRole)Enum.Parse(typeof(CollectionRole), e.Value.ToString()))">
+                                <option value="@CollectionRole.Member">Member</option>
+                                <option value="@CollectionRole.Admin">Admin</option>
+                                <option value="@CollectionRole.Owner">Owner</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <span class="role-badge role-@member.Role.ToString().ToLower()">@member.Role</span>
+                        }
+                    </div>
+                    <div class="member-actions">
+                        @if ((currentUserRole == CollectionRole.Owner || currentUserRole == CollectionRole.Admin) && 
+                             member.UserId != AuthService.CurrentUser?.Id && 
+                             !(member.Role == CollectionRole.Owner && currentUserRole != CollectionRole.Owner))
+                        {
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveMember(member)">
+                                <i class="bi bi-person-dash"></i>
+                            </button>
+                        }
+                        @if (member.UserId == AuthService.CurrentUser?.Id && member.Role != CollectionRole.Owner)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="LeaveCollection">
+                                Leave
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (pendingInvites.Any())
+        {
+            <div class="pending-invites">
+                <h5>Pending Invites</h5>
+                @foreach (var invite in pendingInvites)
+                {
+                    <div class="invite-item">
+                        <div class="invite-info">
+                            <div class="invite-email">@invite.InvitedEmail</div>
+                            <div class="invite-role">Role: @invite.Role</div>
+                            <div class="invite-date">Invited @invite.CreatedAt.ToString("MMM dd, yyyy") by @invite.InvitedByUser?.Name</div>
+                        </div>
+                        <div class="invite-actions">
+                            @if (currentUserRole == CollectionRole.Owner || currentUserRole == CollectionRole.Admin)
+                            {
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelInvite(invite)">
+                                    Cancel
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@if (showInviteModal)
+{
+    <div class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Invite User to Collection</h5>
+                    <button class="btn-close" @onclick="HideInviteModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" @bind="inviteEmail" placeholder="Enter email address" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" @bind="inviteRole">
+                            <option value="@CollectionRole.Member">Member</option>
+                            <option value="@CollectionRole.Admin">Admin</option>
+                            @if (currentUserRole == CollectionRole.Owner)
+                            {
+                                <option value="@CollectionRole.Owner">Owner</option>
+                            }
+                        </select>
+                    </div>
+                    @if (!string.IsNullOrEmpty(inviteError))
+                    {
+                        <div class="alert alert-danger">@inviteError</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="HideInviteModal">Cancel</button>
+                    <button class="btn btn-primary" @onclick="SendInvite" disabled="@(string.IsNullOrWhiteSpace(inviteEmail) || isSendingInvite)">
+                        @if (isSendingInvite)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Send Invite
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int CollectionId { get; set; }
+    [Parameter] public EventCallback OnMembersChanged { get; set; }
+
+    private List<CollectionMember> members = new();
+    private List<CollectionInvite> pendingInvites = new();
+    private CollectionRole currentUserRole = CollectionRole.Member;
+    private bool isLoading = true;
+    private bool showInviteModal = false;
+    private bool isSendingInvite = false;
+    private string inviteEmail = string.Empty;
+    private CollectionRole inviteRole = CollectionRole.Member;
+    private string inviteError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMembers();
+        await LoadPendingInvites();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (CollectionId > 0)
+        {
+            await LoadMembers();
+            await LoadPendingInvites();
+        }
+    }
+
+    private async Task LoadMembers()
+    {
+        if (CollectionId <= 0) return;
+
+        isLoading = true;
+        members = await MemberService.GetCollectionMembersAsync(CollectionId);
+        
+        // Determine current user's role
+        var currentUserId = AuthService.CurrentUser?.Id;
+        var currentMember = members.FirstOrDefault(m => m.UserId == currentUserId);
+        currentUserRole = currentMember?.Role ?? CollectionRole.Member;
+        
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadPendingInvites()
+    {
+        if (CollectionId <= 0) return;
+
+        var allInvites = await InviteService.GetCollectionInvitesAsync(CollectionId);
+        pendingInvites = allInvites.Where(i => i.Status == InviteStatus.Pending).ToList();
+        StateHasChanged();
+    }
+
+    private async Task UpdateMemberRole(CollectionMember member, CollectionRole newRole)
+    {
+        if (await MemberService.UpdateMemberRoleAsync(member.Id, newRole))
+        {
+            member.Role = newRole;
+            await OnMembersChanged.InvokeAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task RemoveMember(CollectionMember member)
+    {
+        if (await MemberService.RemoveMemberAsync(member.Id))
+        {
+            members.Remove(member);
+            await OnMembersChanged.InvokeAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LeaveCollection()
+    {
+        if (await MemberService.LeaveCollectionAsync(CollectionId))
+        {
+            await OnMembersChanged.InvokeAsync();
+        }
+    }
+
+    private void ShowInviteModal()
+    {
+        inviteEmail = string.Empty;
+        inviteRole = CollectionRole.Member;
+        inviteError = string.Empty;
+        showInviteModal = true;
+    }
+
+    private void HideInviteModal()
+    {
+        showInviteModal = false;
+        inviteError = string.Empty;
+    }
+
+    private async Task SendInvite()
+    {
+        if (string.IsNullOrWhiteSpace(inviteEmail))
+            return;
+
+        isSendingInvite = true;
+        inviteError = string.Empty;
+
+        var invite = await InviteService.CreateInviteAsync(CollectionId, inviteEmail.Trim(), inviteRole);
+        
+        if (invite != null)
+        {
+            await LoadPendingInvites();
+            HideInviteModal();
+        }
+        else
+        {
+            inviteError = "Failed to send invite. The user may already be a member or have a pending invite.";
+        }
+
+        isSendingInvite = false;
+        StateHasChanged();
+    }
+
+    private async Task CancelInvite(CollectionInvite invite)
+    {
+        if (await InviteService.CancelInviteAsync(invite.Id))
+        {
+            pendingInvites.Remove(invite);
+            StateHasChanged();
+        }
+    }
+
+    public async Task RefreshMembers()
+    {
+        await LoadMembers();
+        await LoadPendingInvites();
+    }
+}

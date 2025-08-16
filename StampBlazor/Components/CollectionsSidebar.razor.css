@@ -1,0 +1,354 @@
+.collections-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem;
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+
+.collections-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #444;
+}
+
+.collections-header h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.collections-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.loading, .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #cccccc !important;
+}
+
+.collection-item {
+    margin-bottom: 0.5rem;
+}
+
+.collection-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: #3a3a3a;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.collection-header:hover {
+    background-color: #404040;
+}
+
+.collection-header i {
+    margin-right: 0.5rem;
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.collection-name {
+    flex: 1;
+    color: #ffffff !important;
+    font-weight: 500;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.collection-actions {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.collection-header:hover .collection-actions {
+    opacity: 1;
+}
+
+.requests-list {
+    margin-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.request-item {
+    display: flex;
+    align-items: center;
+    padding: 0.4rem 0.5rem;
+    margin-bottom: 2px;
+    background-color: #2a2a2a;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.request-item:hover {
+    background-color: #404040;
+}
+
+.method-badge {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-right: 0.5rem;
+    min-width: 40px;
+    text-align: center;
+}
+
+.method-get { background-color: #22c55e; color: white; }
+.method-post { background-color: #3b82f6; color: white; }
+.method-put { background-color: #f59e0b; color: white; }
+.method-delete { background-color: #ef4444; color: white; }
+.method-patch { background-color: #8b5cf6; color: white; }
+.method-head { background-color: #6b7280; color: white; }
+.method-options { background-color: #374151; color: white; }
+
+.request-name {
+    color: #ffffff !important;
+    font-size: 0.9rem;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.no-requests {
+    color: #888;
+    font-style: italic;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-dialog {
+    background: white;
+    border-radius: 8px;
+    min-width: 400px;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-dialog.modal-lg {
+    max-width: 800px;
+}
+
+.modal-content {
+    padding: 0;
+}
+
+.modal-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h5 {
+    margin: 0;
+    color: #333;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* Custom button styling for collections */
+.collections-header .btn {
+    background-color: #ff6b35;
+    border: 1px solid #ff6b35;
+    color: white;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 0.375rem 0.5rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.collections-header .btn:hover {
+    background-color: #e55a2b;
+    border-color: #e55a2b;
+    transform: translateY(-1px);
+}
+
+.collections-header .btn:active {
+    transform: translateY(0);
+}
+
+.collection-actions .btn {
+    background-color: transparent;
+    border: 1px solid #666;
+    color: #ccc;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.375rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.collection-actions .btn:hover {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.collection-actions .btn:active {
+    transform: translateY(0);
+}
+
+/* Enhanced button styling for collection actions */
+.btn-share {
+    background-color: transparent;
+    border: 1px solid #22c55e;
+    color: #22c55e;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 500;
+}
+
+.btn-share:hover {
+    background-color: #22c55e;
+    border-color: #22c55e;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+}
+
+.btn-share:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(34, 197, 94, 0.2);
+}
+
+.btn-delete {
+    background-color: transparent;
+    border: 1px solid #666;
+    color: #ccc;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.375rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+.btn-delete:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(220, 53, 69, 0.2);
+}
+
+.btn-text {
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .btn-text {
+        display: none;
+    }
+    
+    .btn-share {
+        padding: 0.25rem 0.375rem;
+        gap: 0;
+    }
+}
+
+.empty-state .btn {
+    background-color: transparent;
+    border: 1px solid #ff6b35;
+    color: #ff6b35;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.empty-state .btn:hover {
+    background-color: #ff6b35;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.empty-state .btn:active {
+    transform: translateY(0);
+}
+
+/* Additional text visibility fixes */
+.collection-header * {
+    color: inherit !important;
+}
+
+.request-item * {
+    color: inherit !important;
+}
+
+/* Ensure all text is visible regardless of Bootstrap overrides */
+.collections-container,
+.collections-container * {
+    text-decoration: none;
+}
+
+.collections-container .text-muted {
+    color: #cccccc !important;
+}
+
+/* Override any potential Bootstrap color conflicts */
+.collections-container a,
+.collections-container .btn-link {
+    color: #ffffff !important;
+}
+
+/* Ensure empty state text is visible */
+.empty-state p {
+    color: #cccccc !important;
+    margin-bottom: 1rem;
+}

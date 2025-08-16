@@ -1,0 +1,334 @@
+@using StampBlazor.Models
+@using StampBlazor.Services
+@inject WorkspaceService WorkspaceService
+
+<div class="workspace-selector">
+    <div class="workspace-header">
+        <div class="workspace-current" @onclick="ToggleDropdown">
+            <div class="workspace-info">
+                <i class="bi bi-briefcase me-2"></i>
+                <div>
+                    <div class="workspace-name">@(CurrentWorkspace?.Name ?? "Select Workspace")</div>
+                    @if (!string.IsNullOrEmpty(CurrentWorkspace?.Description))
+                    {
+                        <div class="workspace-description">@CurrentWorkspace.Description</div>
+                    }
+                </div>
+            </div>
+            <i class="bi bi-chevron-down workspace-chevron @(isDropdownOpen ? "open" : "")"></i>
+        </div>
+        
+        @if (isDropdownOpen)
+        {
+            <div class="workspace-dropdown">
+                <div class="workspace-list">
+                    @if (workspaces != null)
+                    {
+                        @foreach (var workspace in workspaces)
+                        {
+                            <div class="workspace-item @(workspace.Id == CurrentWorkspace?.Id ? "active" : "")" 
+                                 @onclick="() => SelectWorkspace(workspace)">
+                                <i class="bi bi-briefcase me-2"></i>
+                                <div class="workspace-item-info">
+                                    <div class="workspace-item-name">@workspace.Name</div>
+                                    @if (!string.IsNullOrEmpty(workspace.Description))
+                                    {
+                                        <div class="workspace-item-description">@workspace.Description</div>
+                                    }
+                                </div>
+                                @if (workspace.Id == CurrentWorkspace?.Id)
+                                {
+                                    <i class="bi bi-check-circle ms-auto"></i>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+                
+                <div class="workspace-actions">
+                    <button class="btn btn-sm btn-outline-primary" @onclick="ShowCreateWorkspaceModal">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        New Workspace
+                    </button>
+                    @if (CurrentWorkspace != null)
+                    {
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="ShowEditWorkspaceModal">
+                            <i class="bi bi-pencil me-1"></i>
+                            Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="ShowDeleteWorkspaceModal">
+                            <i class="bi bi-trash me-1"></i>
+                            Delete
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (showCreateWorkspaceModal)
+{
+    <div class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-briefcase me-2"></i>Create New Workspace</h5>
+                    <button class="btn-close" @onclick="HideCreateWorkspaceModal"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" @bind="newWorkspaceName" placeholder="Enter workspace name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" @bind="newWorkspaceDescription" placeholder="Enter description (optional)"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="HideCreateWorkspaceModal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" @onclick="CreateWorkspace" disabled="@string.IsNullOrWhiteSpace(newWorkspaceName)">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showEditWorkspaceModal)
+{
+    <div class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-pencil me-2"></i>Edit Workspace</h5>
+                    <button class="btn-close" @onclick="HideEditWorkspaceModal"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" @bind="editWorkspaceName" placeholder="Enter workspace name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" @bind="editWorkspaceDescription" placeholder="Enter description (optional)"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="HideEditWorkspaceModal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" @onclick="UpdateWorkspace" disabled="@string.IsNullOrWhiteSpace(editWorkspaceName)">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showDeleteWorkspaceModal)
+{
+    <div class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Delete Workspace</h5>
+                    <button class="btn-close" @onclick="HideDeleteWorkspaceModal"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the workspace "<strong>@CurrentWorkspace?.Name</strong>"?</p>
+                    <p class="text-muted">All collections in this workspace will be moved to your default workspace.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="HideDeleteWorkspaceModal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </button>
+                    <button class="btn btn-danger" @onclick="DeleteWorkspace">
+                        <i class="bi bi-trash me-1"></i>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public EventCallback<Workspace> OnWorkspaceChanged { get; set; }
+    [Parameter] public Workspace? CurrentWorkspace { get; set; }
+
+    private List<Workspace>? workspaces;
+    private bool isDropdownOpen = false;
+    
+    // Create workspace modal
+    private bool showCreateWorkspaceModal = false;
+    private string newWorkspaceName = string.Empty;
+    private string newWorkspaceDescription = string.Empty;
+    
+    // Edit workspace modal
+    private bool showEditWorkspaceModal = false;
+    private string editWorkspaceName = string.Empty;
+    private string editWorkspaceDescription = string.Empty;
+    
+    // Delete workspace modal
+    private bool showDeleteWorkspaceModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWorkspaces();
+    }
+
+    private async Task LoadWorkspaces()
+    {
+        workspaces = await WorkspaceService.GetWorkspacesAsync();
+        
+        // If no current workspace is set and we have workspaces, select the first one
+        if (CurrentWorkspace == null && workspaces?.Any() == true)
+        {
+            await SelectWorkspace(workspaces.First());
+        }
+        
+        StateHasChanged();
+    }
+
+    private void ToggleDropdown()
+    {
+        isDropdownOpen = !isDropdownOpen;
+    }
+
+    private async Task SelectWorkspace(Workspace workspace)
+    {
+        CurrentWorkspace = workspace;
+        isDropdownOpen = false;
+        await OnWorkspaceChanged.InvokeAsync(workspace);
+        StateHasChanged();
+    }
+
+    // Create workspace modal methods
+    private void ShowCreateWorkspaceModal()
+    {
+        newWorkspaceName = string.Empty;
+        newWorkspaceDescription = string.Empty;
+        showCreateWorkspaceModal = true;
+        isDropdownOpen = false;
+    }
+
+    private void HideCreateWorkspaceModal()
+    {
+        showCreateWorkspaceModal = false;
+    }
+
+    private async Task CreateWorkspace()
+    {
+        if (string.IsNullOrWhiteSpace(newWorkspaceName))
+            return;
+
+        var newWorkspace = new Workspace
+        {
+            Name = newWorkspaceName.Trim(),
+            Description = string.IsNullOrWhiteSpace(newWorkspaceDescription) ? null : newWorkspaceDescription.Trim()
+        };
+
+        var result = await WorkspaceService.CreateWorkspaceAsync(newWorkspace);
+        if (result != null)
+        {
+            await LoadWorkspaces();
+            await SelectWorkspace(result);
+            HideCreateWorkspaceModal();
+        }
+    }
+
+    // Edit workspace modal methods
+    private void ShowEditWorkspaceModal()
+    {
+        if (CurrentWorkspace == null) return;
+        
+        editWorkspaceName = CurrentWorkspace.Name;
+        editWorkspaceDescription = CurrentWorkspace.Description ?? string.Empty;
+        showEditWorkspaceModal = true;
+        isDropdownOpen = false;
+    }
+
+    private void HideEditWorkspaceModal()
+    {
+        showEditWorkspaceModal = false;
+    }
+
+    private async Task UpdateWorkspace()
+    {
+        if (CurrentWorkspace == null || string.IsNullOrWhiteSpace(editWorkspaceName))
+            return;
+
+        var updatedWorkspace = new Workspace
+        {
+            Id = CurrentWorkspace.Id,
+            Name = editWorkspaceName.Trim(),
+            Description = string.IsNullOrWhiteSpace(editWorkspaceDescription) ? null : editWorkspaceDescription.Trim(),
+            UserId = CurrentWorkspace.UserId,
+            CreatedAt = CurrentWorkspace.CreatedAt,
+            UpdatedAt = CurrentWorkspace.UpdatedAt,
+            Collections = CurrentWorkspace.Collections
+        };
+
+        var success = await WorkspaceService.UpdateWorkspaceAsync(updatedWorkspace);
+        if (success)
+        {
+            CurrentWorkspace.Name = updatedWorkspace.Name;
+            CurrentWorkspace.Description = updatedWorkspace.Description;
+            await LoadWorkspaces();
+            HideEditWorkspaceModal();
+            StateHasChanged();
+        }
+    }
+
+    // Delete workspace modal methods
+    private void ShowDeleteWorkspaceModal()
+    {
+        showDeleteWorkspaceModal = true;
+        isDropdownOpen = false;
+    }
+
+    private void HideDeleteWorkspaceModal()
+    {
+        showDeleteWorkspaceModal = false;
+    }
+
+    private async Task DeleteWorkspace()
+    {
+        if (CurrentWorkspace == null) return;
+
+        var success = await WorkspaceService.DeleteWorkspaceAsync(CurrentWorkspace.Id);
+        if (success)
+        {
+            await LoadWorkspaces();
+            
+            // Select the first available workspace
+            if (workspaces?.Any() == true)
+            {
+                await SelectWorkspace(workspaces.First());
+            }
+            else
+            {
+                CurrentWorkspace = null;
+                await OnWorkspaceChanged.InvokeAsync(null);
+            }
+            
+            HideDeleteWorkspaceModal();
+        }
+    }
+
+    public async Task RefreshWorkspaces()
+    {
+        await LoadWorkspaces();
+    }
+}

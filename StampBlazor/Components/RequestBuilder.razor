@@ -1,0 +1,344 @@
+@using StampBlazor.Models
+@using StampBlazor.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject HttpRequestService HttpRequestService
+@inject RequestService RequestService
+@inject CollectionService CollectionService
+
+<div class="request-builder">
+    <div class="request-header">
+        <div class="request-control-row">
+            <div class="method-selector">
+                <div class="method-button-container">
+                    <button type="button" class="btn method-dropdown @GetMethodClass()" @onclick="ToggleMethodDropdown">
+                        @GetMethodIcon(currentRequest.Method)
+                        @currentRequest.Method
+                        <i class="bi bi-chevron-down ms-1"></i>
+                    </button>
+                    @if (showMethodDropdown)
+                    {
+                        <div class="method-dropdown-menu">
+                            @foreach (var method in new[] { "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS" })
+                            {
+                                <button type="button" class="method-dropdown-item method-@method.ToLower()" @onclick="() => SelectMethod(method)">
+                                    @GetMethodIcon(method)
+                                    @method
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="url-input">
+                <input type="text" class="form-control url-field" 
+                       value="@currentRequest.Url" 
+                       @oninput="HandleUrlChange"
+                       @onkeypress="HandleKeyPress"
+                       placeholder="Enter request URL" />
+            </div>
+            <div class="send-controls">
+                <button type="button" class="btn btn-primary send-btn" @onclick="SendRequest" disabled="@(isLoading || string.IsNullOrWhiteSpace(currentRequest.Url))">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-send me-1"></i>
+                    }
+                    Send
+                </button>
+                <button type="button" class="btn btn-outline-secondary save-btn" @onclick="ShowSaveModal" disabled="@string.IsNullOrWhiteSpace(currentRequest.Url)">
+                    <i class="bi bi-bookmark me-1"></i>
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="request-tabs">
+        <RequestTabs @bind-CurrentRequest="currentRequest" @bind-CurrentRequest:after="NotifyRequestChanged" />
+    </div>
+
+    <div class="response-section">
+        @if (response != null)
+        {
+            <ResponseViewer Response="response" />
+        }
+        else if (!hasRequestBeenSent)
+        {
+            <div class="no-response">
+                <div class="no-response-content">
+                    <i class="bi bi-arrow-up-circle display-1 text-muted mb-3"></i>
+                    <h4>Enter a URL and click Send to get a response</h4>
+                    <p>The response will appear here after you send a request.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (showSaveModal)
+{
+    <div class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-bookmark me-2"></i>Save Request</h5>
+                    <button class="btn-close" @onclick="HideSaveModal"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Request Name</label>
+                        <input type="text" class="form-control" @bind="saveRequestName" placeholder="Enter request name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Collection</label>
+                        <select class="form-select" @bind="saveCollectionId">
+                            <option value="0">Select a collection</option>
+                            @if (availableCollections != null)
+                            {
+                                @foreach (var collection in availableCollections)
+                                {
+                                    <option value="@collection.Id">@collection.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideSaveModal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveRequest" disabled="@(string.IsNullOrWhiteSpace(saveRequestName) || saveCollectionId == 0)">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public ApiRequest? SelectedRequest { get; set; }
+    [Parameter] public EventCallback OnRequestSaved { get; set; }
+    [Parameter] public EventCallback OnRequestChanged { get; set; }
+
+    private ApiRequest currentRequest = new() { Method = "GET" };
+    private HttpResponseInfo? response;
+    private bool isLoading = false;
+    private bool hasRequestBeenSent = false;
+    private bool showSaveModal = false;
+    private bool showMethodDropdown = false;
+    private string saveRequestName = string.Empty;
+    private int saveCollectionId = 0;
+    private List<Collection>? availableCollections;
+
+    protected override void OnParametersSet()
+    {
+        if (SelectedRequest != null && currentRequest != SelectedRequest)
+        {
+            currentRequest = SelectedRequest;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SendRequest()
+    {
+        if (string.IsNullOrWhiteSpace(currentRequest.Url))
+            return;
+
+        isLoading = true;
+        hasRequestBeenSent = true;
+        response = null;
+        StateHasChanged();
+
+        try
+        {
+            response = await HttpRequestService.SendRequestAsync(
+                currentRequest.Url, 
+                currentRequest.Method, 
+                currentRequest.Headers, 
+                currentRequest.Body, 
+                currentRequest.QueryParams,
+                currentRequest.Authentication);
+        }
+        catch (Exception ex)
+        {
+            response = new HttpResponseInfo
+            {
+                StatusCode = System.Net.HttpStatusCode.BadRequest,
+                StatusText = "Error",
+                Body = $"Error sending request: {ex.Message}"
+            };
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ShowSaveModal()
+    {
+        Console.WriteLine("ShowSaveModal called");
+        saveRequestName = currentRequest.Name;
+        saveCollectionId = currentRequest.CollectionId;
+        
+        // Load available collections if not already loaded
+        if (availableCollections == null)
+        {
+            Console.WriteLine("Loading collections...");
+            availableCollections = await CollectionService.GetCollectionsAsync();
+            Console.WriteLine($"Loaded {availableCollections?.Count ?? 0} collections");
+        }
+        
+        showSaveModal = true;
+        StateHasChanged();
+    }
+
+    private void HideSaveModal()
+    {
+        showSaveModal = false;
+        saveRequestName = string.Empty;
+        saveCollectionId = 0;
+    }
+
+    private async Task SaveRequest()
+    {
+        Console.WriteLine("SaveRequest called");
+        
+        if (string.IsNullOrWhiteSpace(saveRequestName) || saveCollectionId == 0)
+        {
+            Console.WriteLine($"Save validation failed: Name='{saveRequestName}', CollectionId={saveCollectionId}");
+            return;
+        }
+
+        Console.WriteLine($"Saving request '{saveRequestName}' to collection {saveCollectionId}");
+
+        var requestToSave = new ApiRequest
+        {
+            Id = currentRequest.Id,
+            Name = saveRequestName.Trim(),
+            Url = currentRequest.Url,
+            Method = currentRequest.Method,
+            Headers = currentRequest.Headers,
+            Body = currentRequest.Body,
+            QueryParams = currentRequest.QueryParams,
+            CollectionId = saveCollectionId
+        };
+
+        bool success;
+        if (requestToSave.Id > 0)
+        {
+            Console.WriteLine($"Updating existing request with ID {requestToSave.Id}");
+            success = await RequestService.UpdateRequestAsync(requestToSave);
+        }
+        else
+        {
+            Console.WriteLine("Creating new request");
+            var result = await RequestService.CreateRequestAsync(requestToSave);
+            success = result != null;
+            if (success && result != null)
+            {
+                currentRequest.Id = result.Id;
+                Console.WriteLine($"New request created with ID {result.Id}");
+            }
+        }
+
+        if (success)
+        {
+            Console.WriteLine("Request saved successfully");
+            currentRequest.Name = saveRequestName.Trim();
+            currentRequest.CollectionId = saveCollectionId;
+            HideSaveModal();
+            await OnRequestSaved.InvokeAsync();
+        }
+        else
+        {
+            Console.WriteLine("Failed to save request");
+        }
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendRequest();
+        }
+    }
+
+    private async Task NotifyRequestChanged()
+    {
+        await OnRequestChanged.InvokeAsync();
+        StateHasChanged();
+    }
+
+    private async Task HandleMethodChange(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            var newMethod = e.Value.ToString()!;
+            if (currentRequest.Method != newMethod)
+            {
+                currentRequest.Method = newMethod;
+                await NotifyRequestChanged();
+            }
+        }
+    }
+
+    private async Task HandleUrlChange(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            var newUrl = e.Value.ToString()!;
+            if (currentRequest.Url != newUrl)
+            {
+                currentRequest.Url = newUrl;
+                await NotifyRequestChanged();
+            }
+        }
+    }
+
+    private string _cachedMethodClass = "method-get";
+    private string _lastMethod = "GET";
+    
+    private string GetMethodClass()
+    {
+        if (currentRequest.Method != _lastMethod)
+        {
+            _lastMethod = currentRequest.Method;
+            _cachedMethodClass = $"method-{currentRequest.Method.ToLower()}";
+        }
+        return _cachedMethodClass;
+    }
+
+    private void ToggleMethodDropdown()
+    {
+        showMethodDropdown = !showMethodDropdown;
+    }
+
+    private async Task SelectMethod(string method)
+    {
+        if (currentRequest.Method != method)
+        {
+            currentRequest.Method = method;
+            await NotifyRequestChanged();
+        }
+        showMethodDropdown = false;
+    }
+
+    private RenderFragment GetMethodIcon(string method) => method switch
+    {
+        "GET" => @<i class="bi bi-arrow-down-circle me-1"></i>,
+        "POST" => @<i class="bi bi-plus-circle me-1"></i>,
+        "PUT" => @<i class="bi bi-arrow-up-circle me-1"></i>,
+        "PATCH" => @<i class="bi bi-pencil-square me-1"></i>,
+        "DELETE" => @<i class="bi bi-trash me-1"></i>,
+        "HEAD" => @<i class="bi bi-info-circle me-1"></i>,
+        "OPTIONS" => @<i class="bi bi-gear me-1"></i>,
+        _ => @<i class="bi bi-question-circle me-1"></i>
+    };
+}

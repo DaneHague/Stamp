@@ -1,0 +1,8 @@
+@using StampBlazor.Components
+@using StampBlazor.Models
+
+<CollectionsSidebar OnRequestSelected="OnRequestSelected" />
+
+@code {
+    [Parameter] public EventCallback<ApiRequest> OnRequestSelected { get; set; }
+}

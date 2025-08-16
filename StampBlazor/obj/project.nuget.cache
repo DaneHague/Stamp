@@ -1,0 +1,71 @@
+{
+  "version": 2,
+  "dgSpecHash": "tx3W2TvVN1s=",
+  "success": true,
+  "projectFilePath": "/Users/danehague/Documents/Stamp/StampBlazor/StampBlazor.csproj",
+  "expectedPackageFiles": [
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.authorization/8.0.14/microsoft.aspnetcore.authorization.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.components/8.0.14/microsoft.aspnetcore.components.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.components.analyzers/8.0.14/microsoft.aspnetcore.components.analyzers.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.components.authorization/8.0.14/microsoft.aspnetcore.components.authorization.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.components.forms/8.0.14/microsoft.aspnetcore.components.forms.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.components.web/8.0.14/microsoft.aspnetcore.components.web.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.components.webassembly/8.0.14/microsoft.aspnetcore.components.webassembly.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.components.webassembly.authentication/8.0.14/microsoft.aspnetcore.components.webassembly.authentication.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.components.webassembly.devserver/8.0.14/microsoft.aspnetcore.components.webassembly.devserver.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.aspnetcore.metadata/8.0.14/microsoft.aspnetcore.metadata.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.authentication.webassembly.msal/8.0.14/microsoft.authentication.webassembly.msal.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.configuration/9.0.0/microsoft.extensions.configuration.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.configuration.abstractions/9.0.0/microsoft.extensions.configuration.abstractions.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.configuration.binder/9.0.0/microsoft.extensions.configuration.binder.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.configuration.fileextensions/8.0.1/microsoft.extensions.configuration.fileextensions.8.0.1.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.configuration.json/8.0.1/microsoft.extensions.configuration.json.8.0.1.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.dependencyinjection/9.0.0/microsoft.extensions.dependencyinjection.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.0/microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.diagnostics/9.0.0/microsoft.extensions.diagnostics.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.diagnostics.abstractions/9.0.0/microsoft.extensions.diagnostics.abstractions.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.fileproviders.abstractions/8.0.0/microsoft.extensions.fileproviders.abstractions.8.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.fileproviders.physical/8.0.0/microsoft.extensions.fileproviders.physical.8.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.filesystemglobbing/8.0.0/microsoft.extensions.filesystemglobbing.8.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.http/9.0.0/microsoft.extensions.http.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.logging/9.0.0/microsoft.extensions.logging.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.logging.abstractions/9.0.0/microsoft.extensions.logging.abstractions.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.options/9.0.0/microsoft.extensions.options.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.options.configurationextensions/9.0.0/microsoft.extensions.options.configurationextensions.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.extensions.primitives/9.0.0/microsoft.extensions.primitives.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.jsinterop/8.0.14/microsoft.jsinterop.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.jsinterop.webassembly/8.0.14/microsoft.jsinterop.webassembly.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.net.illink.tasks/8.0.14/microsoft.net.illink.tasks.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.net.sdk.webassembly.pack/8.0.14/microsoft.net.sdk.webassembly.pack.8.0.14.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/system.diagnostics.diagnosticsource/9.0.0/system.diagnostics.diagnosticsource.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/system.io.pipelines/9.0.0/system.io.pipelines.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/system.net.http.json/9.0.0/system.net.http.json.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/system.text.encodings.web/9.0.0/system.text.encodings.web.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/system.text.json/9.0.0/system.text.json.9.0.0.nupkg.sha512",
+    "/Users/danehague/.nuget/packages/microsoft.netcore.app.runtime.mono.browser-wasm/8.0.14/microsoft.netcore.app.runtime.mono.browser-wasm.8.0.14.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "StampBlazor depends on Microsoft.Extensions.Http (>= 8.0.14) but Microsoft.Extensions.Http 8.0.14 was not found. Microsoft.Extensions.Http 9.0.0 was resolved instead.",
+      "libraryId": "Microsoft.Extensions.Http",
+      "targetGraphs": [
+        "net8.0",
+        "net8.0/browser-wasm"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "StampBlazor depends on System.Net.Http.Json (>= 8.0.14) but System.Net.Http.Json 8.0.14 was not found. System.Net.Http.Json 9.0.0 was resolved instead.",
+      "libraryId": "System.Net.Http.Json",
+      "targetGraphs": [
+        "net8.0",
+        "net8.0/browser-wasm"
+      ]
+    }
+  ]
+}
