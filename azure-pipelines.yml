@@ -15,10 +15,6 @@ stages:
        - job: BuildApi
          displayName: 'Build API'
          steps:
-         - task: UseDotNet@2
-           inputs:
-             packageType: 'sdk'
-             version: $(dotnetVersion)
          
          - task: DotNetCoreCLI@2
            displayName: 'Restore API'
