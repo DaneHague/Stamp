@@ -1,0 +1,88 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- none
+
+pool:
+  vmImage: ubuntu-latest
+  
+stages:
+     - stage: Build
+       jobs:
+       - job: BuildApi
+         displayName: 'Build API'
+         steps:
+         - task: UseDotNet@2
+           inputs:
+             packageType: 'sdk'
+             version: $(dotnetVersion)
+         
+         - task: DotNetCoreCLI@2
+           displayName: 'Restore API'
+           inputs:
+             command: 'restore'
+             projects: 'StampApi/StampApi.csproj'
+         
+         - task: DotNetCoreCLI@2
+           displayName: 'Build API'
+           inputs:
+             command: 'build'
+             projects: 'StampApi/StampApi.csproj'
+             arguments: '--configuration $(buildConfiguration) --no-restore'
+         
+         - task: DotNetCoreCLI@2
+           displayName: 'Test API'
+           inputs:
+             command: 'test'
+             projects: 'StampApi.Tests/StampApi.Tests.csproj'
+             arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage"'
+         
+         - task: DotNetCoreCLI@2
+           displayName: 'Publish API'
+           inputs:
+             command: 'publish'
+             publishWebProjects: false
+             projects: 'StampApi/StampApi.csproj'
+             arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api'
+         
+         - task: PublishBuildArtifacts@1
+           inputs:
+             PathtoPublish: '$(Build.ArtifactStagingDirectory)/api'
+             ArtifactName: 'api-drop'
+
+       - job: BuildBlazor
+         displayName: 'Build Blazor'
+         steps:
+         - task: UseDotNet@2
+           inputs:
+             packageType: 'sdk'
+             version: $(dotnetVersion)
+         
+         - task: DotNetCoreCLI@2
+           displayName: 'Restore Blazor'
+           inputs:
+             command: 'restore'
+             projects: 'StampBlazor/StampBlazor.csproj'
+         
+         - task: DotNetCoreCLI@2
+           displayName: 'Build Blazor'
+           inputs:
+             command: 'build'
+             projects: 'StampBlazor/StampBlazor.csproj'
+             arguments: '--configuration $(buildConfiguration) --no-restore'
+         
+         - task: DotNetCoreCLI@2
+           displayName: 'Publish Blazor'
+           inputs:
+             command: 'publish'
+             publishWebProjects: false
+             projects: 'StampBlazor/StampBlazor.csproj'
+             arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/blazor'
+         
+         - task: PublishBuildArtifacts@1
+           inputs:
+             PathtoPublish: '$(Build.ArtifactStagingDirectory)/blazor'
+             ArtifactName: 'blazor-drop'
