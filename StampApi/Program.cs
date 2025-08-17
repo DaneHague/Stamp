@@ -5,23 +5,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StampApi.Data;
 using StampApi.Models;
-using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Azure Key Vault configuration if in Azure environment
-if (!builder.Environment.IsDevelopment())
-{
-    var keyVaultEndpoint = builder.Configuration["KeyVault:Endpoint"];
-    if (!string.IsNullOrEmpty(keyVaultEndpoint))
-    {
-        builder.Configuration.AddAzureKeyVault(
-            new Uri(keyVaultEndpoint),
-            new DefaultAzureCredential());
-    }
-}
-
-// Add Application Insights
+// Add Application Insights (optional - configure via App Service settings)
 builder.Services.AddApplicationInsightsTelemetry();
 
 // Add services to the container.
@@ -85,8 +72,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // Add health checks
-builder.Services.AddHealthChecks()
-    .AddDbContext<StampDbContext>();
+builder.Services.AddHealthChecks();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
