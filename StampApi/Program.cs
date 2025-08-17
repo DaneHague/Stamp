@@ -5,12 +5,39 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StampApi.Data;
 using StampApi.Models;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add Azure Key Vault configuration if in Azure environment
+if (!builder.Environment.IsDevelopment())
+{
+    var keyVaultEndpoint = builder.Configuration["KeyVault:Endpoint"];
+    if (!string.IsNullOrEmpty(keyVaultEndpoint))
+    {
+        builder.Configuration.AddAzureKeyVault(
+            new Uri(keyVaultEndpoint),
+            new DefaultAzureCredential());
+    }
+}
+
+// Add Application Insights
+builder.Services.AddApplicationInsightsTelemetry();
+
 // Add services to the container.
-builder.Services.AddDbContext<StampDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Configure database based on environment
+if (builder.Environment.IsDevelopment())
+{
+    // Use SQLite for local development
+    builder.Services.AddDbContext<StampDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
+else
+{
+    // Use SQL Server for Azure environments
+    builder.Services.AddDbContext<StampDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 // Add Identity services
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
@@ -57,16 +84,34 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// Add CORS policy for local development
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddDbContext<StampDbContext>();
+
+// Add CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("LocalDevelopment", policy =>
+    if (builder.Environment.IsDevelopment())
     {
-        policy.WithOrigins("http://localhost:5175", "https://localhost:5175")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
+        options.AddPolicy("LocalDevelopment", policy =>
+        {
+            policy.WithOrigins("http://localhost:5175", "https://localhost:5175")
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+    }
+    else
+    {
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+        options.AddPolicy("Production", policy =>
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+    }
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -82,6 +127,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors("LocalDevelopment");
 }
+else
+{
+    app.UseHsts();
+    app.UseCors("Production");
+}
+
+// Apply database migrations automatically in non-development environments
+if (!app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<StampDbContext>();
+        context.Database.Migrate();
+    }
+}
 
 app.UseHttpsRedirection();
 
@@ -89,5 +149,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

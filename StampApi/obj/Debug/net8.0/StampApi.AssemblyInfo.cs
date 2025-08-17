@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StampApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ccd7e9cc2abbc551b72bc9b25beba0c6fb8fa068")]
 [assembly: System.Reflection.AssemblyProductAttribute("StampApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StampApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
