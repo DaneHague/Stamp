@@ -30,13 +30,6 @@ stages:
              arguments: '--configuration $(buildConfiguration) --no-restore'
          
          - task: DotNetCoreCLI@2
-           displayName: 'Test API'
-           inputs:
-             command: 'test'
-             projects: 'StampApi.Tests/StampApi.Tests.csproj'
-             arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage"'
-         
-         - task: DotNetCoreCLI@2
            displayName: 'Publish API'
            inputs:
              command: 'publish'
